@@ -23,6 +23,7 @@ import {
   setCurrentTime,
   setDuration,
   setIsPlaying,
+  setStopTime,
 } from '../features/controlpanel/controlpanelSlice';
 import excelApi from '../api/excelApi';
 import { toast } from 'react-toastify';
@@ -34,6 +35,7 @@ const TableCT = () => {
   const { activeItemId, activeTabId, filter } = useAppSelector(
     (state) => state.stagelist
   );
+  const { currentTime } = useAppSelector((state) => state.controlpanel);
   const { auth } = useAppSelector((state) => state.auth);
   const category = localStorage.getItem('category');
   const dispatch = useAppDispatch();
@@ -69,12 +71,13 @@ const TableCT = () => {
     const { Nva, Va } = item;
     const avgNva = Nva.Average;
     const avgVa = Va.Average;
-    console.log(activeColId, colId);
+    // console.log(activeColId, colId);
     if (!activeItemId) return;
     if (rowId !== activeItemId) return;
     if (avgNva && avgVa) return;
     if (activeColId === colId) {
       dispatch(setIsPlaying(false));
+      dispatch(setStopTime(currentTime));
       // return;
     }
 

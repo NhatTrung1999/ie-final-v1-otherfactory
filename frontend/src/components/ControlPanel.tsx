@@ -22,16 +22,17 @@ const ControlPanel = () => {
   const { activeItemId } = useAppSelector((state) => state.stagelist);
   const { isPlaying, duration, currentTime, startTime, stopTime, types } =
     useAppSelector((state) => state.controlpanel);
-    const { auth } =
-    useAppSelector((state) => state.auth);
+  const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
   const handleStartStop = () => {
     dispatch(setIsPlaying(!isPlaying));
     if (!isPlaying) {
       dispatch(setStartTime(currentTime));
-      if(playRef.current) {
-        playRef.current.getInternalPlayer().play()
+      console.log(currentTime);
+      if (playRef.current) {
+        playRef.current.seekTo(currentTime, 'seconds');
+        playRef.current.getInternalPlayer().play();
       }
     } else {
       dispatch(setStopTime(currentTime));
@@ -39,6 +40,11 @@ const ControlPanel = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    if(isPlaying) {
+      return
+    }
+
     const newValue = Number(e.target.value);
     if (playRef.current) {
       playRef.current.seekTo(newValue, 'seconds');
