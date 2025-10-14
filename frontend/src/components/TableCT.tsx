@@ -106,7 +106,9 @@ const TableCT = () => {
   };
 
   const handleConfirm = async () => {
+    // console.log(activeTabId);
     const newTablect: ITableCtPayload[] = tablect
+      .filter((item) => item.Area.toLowerCase() === activeTabId.toLowerCase())
       .filter((item) => item.ConfirmId === null)
       .map((item) => ({
         ...item,
@@ -114,11 +116,15 @@ const TableCT = () => {
         Va: JSON.stringify(item.Va),
         ConfirmId: auth?.UserID || '',
       }));
+    // console.log(newTablect);
     let result = await dispatch(confirmData(newTablect));
     if (confirmData.fulfilled.match(result)) {
       await dispatch(getData({ ...filter }));
-      console.log(tablect);
-      const checkConfirmId = tablect.every((item) => item.ConfirmId !== null);
+      const checkConfirmId = tablect
+        .filter((item) => item.Area.toLowerCase() === activeTabId.toLowerCase())
+        .every((item) => item.ConfirmId !== null);
+      console.log(checkConfirmId);
+
       if (checkConfirmId) {
         toast.warn('You have already confirmed!');
         return;

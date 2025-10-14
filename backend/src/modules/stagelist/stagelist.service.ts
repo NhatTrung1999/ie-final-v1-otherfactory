@@ -32,9 +32,22 @@ export class StagelistService {
       const { userId, factory } = user;
       let resData: IStageListData[] = [];
 
+      const networkPath =
+        this.configService.get<string>('UPLOAD_DESTINATION') ||
+        '\\192.168.0.102\\cie\\videos';
+
+      // const basePath = path.join(
+      //   process.cwd(),
+      //   'uploads',
+      //   date,
+      //   season,
+      //   stage,
+      //   area,
+      //   article,
+      // );
+
       const basePath = path.join(
-        process.cwd(),
-        'uploads',
+        networkPath,
         date,
         season,
         stage,
@@ -107,10 +120,10 @@ export class StagelistService {
 
       resData = resData.map((item) => {
         const normalizedPath = item.Path.replace(/\\/g, '/');
-        const relativePath = normalizedPath.split('/uploads')[1];
+        const relativePath = normalizedPath.split('/videos')[1];
         return {
           ...item,
-          Path: `${this.configService.get('BASEPATH')}/uploads${relativePath}`,
+          Path: `${this.configService.get('BASEPATH')}/videos${relativePath}`,
         };
       });
 
@@ -165,10 +178,10 @@ export class StagelistService {
     );
     records = records.map((item) => {
       const normalizedPath = item.Path.replace(/\\/g, '/');
-      const relativePath = normalizedPath.split('/uploads')[1];
+      const relativePath = normalizedPath.split('/videos')[1];
       return {
         ...item,
-        Path: `${this.configService.get('BASEPATH')}/uploads${relativePath}`,
+        Path: `${this.configService.get('BASEPATH')}/videos${relativePath}`,
       };
     });
     return records;

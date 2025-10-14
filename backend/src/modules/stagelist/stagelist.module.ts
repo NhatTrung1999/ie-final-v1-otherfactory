@@ -19,22 +19,41 @@ import * as path from 'path';
           destination: (req, file, cb) => {
             const { date, season, stage, area, article } =
               req.body as CreateStagelistDto;
-            const basePath = `${configService.get('UPLOAD_DESTINATION') || './uploads'}/${date}/${season}/${stage}/${area}/${article}`;
-            if (!fs.existsSync(basePath)) {
-              fs.mkdirSync(basePath, { recursive: true });
+            const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.0.102\\cie\\videos'}`;
+            const targetPath = path.join(
+              basePath,
+              date,
+              season,
+              stage,
+              area,
+              article,
+            );
+            if (!fs.existsSync(targetPath)) {
+              fs.mkdirSync(targetPath, { recursive: true });
             }
-            cb(null, basePath);
+            cb(null, targetPath);
           },
           filename: (req, file, cb) => {
             const { date, season, stage, area, article } =
               req.body as CreateStagelistDto;
             const ext = path.extname(file.originalname);
             const baseName = path.basename(file.originalname, ext);
-            const destination = `${configService.get('UPLOAD_DESTINATION') || './uploads'}/${date}/${season}/${stage}/${area}/${article}`;
+            // const destination = `${configService.get('UPLOAD_DESTINATION') || './uploads'}/${date}/${season}/${stage}/${area}/${article}`;
+            const basePath =
+              configService.get<string>('UPLOAD_DESTINATION') ||
+              '\\192.168.0.102\\cie\\videos';
+            const targetPath = path.join(
+              basePath,
+              date,
+              season,
+              stage,
+              area,
+              article,
+            );
             let finalName = file.originalname;
             let counter = 0;
 
-            while (fs.existsSync(path.join(destination, finalName))) {
+            while (fs.existsSync(path.join(targetPath, finalName))) {
               counter++;
               finalName = `${baseName}(${counter})${ext}`;
             }

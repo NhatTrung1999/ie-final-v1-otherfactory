@@ -64,10 +64,10 @@ export class TablectService {
 
     records = records.map((item) => {
       const normalizedPath = item.Path.replace(/\\/g, '/');
-      const relativePath = normalizedPath.split('/uploads')[1];
+      const relativePath = normalizedPath.split('/videos')[1];
       return {
         ...item,
-        Path: `${this.configService.get('BASEPATH')}/uploads${relativePath}`,
+        Path: `${this.configService.get('BASEPATH')}/videos${relativePath}`,
       };
     });
 
@@ -118,10 +118,10 @@ export class TablectService {
 
     records = records.map((item) => {
       const normalizedPath = item.Path.replace(/\\/g, '/');
-      const relativePath = normalizedPath.split('/uploads')[1];
+      const relativePath = normalizedPath.split('/videos')[1];
       return {
         ...item,
-        Path: `${this.configService.get('BASEPATH')}/uploads${relativePath}`,
+        Path: `${this.configService.get('BASEPATH')}/videos${relativePath}`,
       };
     });
 
