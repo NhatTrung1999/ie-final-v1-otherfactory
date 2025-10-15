@@ -19,7 +19,7 @@ import * as path from 'path';
           destination: (req, file, cb) => {
             const { date, season, stage, area, article } =
               req.body as CreateStagelistDto;
-            const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.0.102\\cie\\videos'}`;
+            const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.0.102\\cie\\IE_VIDEO'}`;
             const targetPath = path.join(
               basePath,
               date,
@@ -41,7 +41,7 @@ import * as path from 'path';
             // const destination = `${configService.get('UPLOAD_DESTINATION') || './uploads'}/${date}/${season}/${stage}/${area}/${article}`;
             const basePath =
               configService.get<string>('UPLOAD_DESTINATION') ||
-              '\\192.168.0.102\\cie\\videos';
+              '\\192.168.0.102\\cie\\IE_VIDEO';
             const targetPath = path.join(
               basePath,
               date,

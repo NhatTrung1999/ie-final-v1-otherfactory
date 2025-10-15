@@ -13,11 +13,11 @@ async function bootstrap() {
   const port = configService.get('PORT');
   const uploadPath =
     configService.get<string>('UPLOAD_DESTINATION') ||
-    '\\192.168.0.102\\cie\\video';
+    '\\192.168.0.102\\cie\\IE_VIDEO';
 
   if (fs.existsSync(uploadPath)) {
-    app.use('/videos', express.static(uploadPath));
-    console.log(`📂 Static videos served from: ${uploadPath}`);
+    app.use('/IE_VIDEO', express.static(uploadPath));
+    console.log(`📂 Static IE_VIDEO served from: ${uploadPath}`);
   } else {
     console.warn(`⚠️ Upload folder not found: ${uploadPath}`);
   }
