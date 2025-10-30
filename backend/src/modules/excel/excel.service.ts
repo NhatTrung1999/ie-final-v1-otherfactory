@@ -150,7 +150,8 @@ export class ExcelService {
     const groupedMap = new Map<string, Section>();
 
     for (const item of records) {
-      const { No, ProgressStagePartName, Area, Nva, Va, Loss } = item;
+      const { No, ProgressStagePartName, Area, Nva, Va, Loss, MachineType } =
+        item;
 
       const vaData = JSON.parse(Va) as ITablectType;
       const nvaData = JSON.parse(Nva) as ITablectType;
@@ -177,6 +178,7 @@ export class ExcelService {
         nvan: nvaAvgCT,
         ct: totalCT,
         loss: Loss,
+        machineType: MachineType,
       });
 
       section.CT += totalCT;
@@ -242,6 +244,7 @@ export class ExcelService {
         worksheet.getCell(`D${startRow}`).value = item.nvan;
         worksheet.getCell(`E${startRow}`).value = item.ct;
         worksheet.getCell(`F${startRow}`).value = item.loss;
+        worksheet.getCell(`K${startRow}`).value = item.machineType;
 
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].forEach(
           (col) => {
@@ -264,6 +267,14 @@ export class ExcelService {
         worksheet.getRow(startRow).height = 24;
         startRow++;
       });
+
+      const columnK = worksheet.getColumn('K');
+      let maxLength = 0;
+      columnK.eachCell({ includeEmpty: true }, (cell) => {
+        const cellValue = cell.value ? cell.value.toString() : '';
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      columnK.width = maxLength;
 
       // Ghi CT
       worksheet.getCell(`D${startRow}`).value = 'CT';
@@ -556,7 +567,7 @@ export class ExcelService {
     Stage: string,
     Area: string,
     Article: string,
-    Account: string
+    Account: string,
   ) {
     let where = 'WHERE 1=1';
     const replacements: any[] = [];

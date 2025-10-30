@@ -13,6 +13,7 @@ export interface Row {
   nvan: number;
   ct: number;
   loss: string;
+  machineType?: string;
 }
 
 export interface Section {
