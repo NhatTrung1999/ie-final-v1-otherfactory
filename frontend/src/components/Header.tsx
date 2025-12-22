@@ -6,7 +6,11 @@ import { logout } from '../features/auth/authSlice';
 import { IoClose } from 'react-icons/io5';
 import { AREA, STAGE } from '../types/constant';
 import { useFormik } from 'formik';
-import { setActiveItemId, setFilter, stagelistList } from '../features/stagelist/stagelistSlice';
+import {
+  setActiveItemId,
+  setFilter,
+  stagelistList,
+} from '../features/stagelist/stagelistSlice';
 import { getData, setActiveColId } from '../features/tablect/tablectSlice';
 
 const Header = () => {
@@ -30,8 +34,8 @@ const Header = () => {
       dispatch(stagelistList({ ...data }));
       dispatch(getData({ ...data }));
       setIsFilterOpen(false);
-      dispatch(setActiveItemId(null))
-      dispatch(setActiveColId(null))
+      dispatch(setActiveItemId(null));
+      dispatch(setActiveColId(null));
     },
   });
 
@@ -48,7 +52,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="h-[70px] bg-gray-600 sticky top-0 flex items-center justify-between px-3 z-10">
+      <header className="h-[70px] bg-gray-600 sticky top-0 flex items-center justify-between px-3 z-60">
         <div className="text-xl text-white font-bold">IE Video CT System</div>
         <div className="flex items-center gap-2">
           <div

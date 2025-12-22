@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosConfig = axios.create({
-  baseURL: import.meta.env.VITE_URLS || 'http://localhost:6869/',
+  baseURL: import.meta.env.VITE_URLS || 'http://localhost:6868/',
   headers: {
     'Content-Type': 'application/json',
   },

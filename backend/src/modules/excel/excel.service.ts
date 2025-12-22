@@ -1209,6 +1209,97 @@ export class ExcelService {
     worksheet.getCell('E7').value = 'LOSS';
     worksheet.getCell('F7').value = 'CT';
 
+    const records: ITablectData[] = await this.IE.query(
+      `SELECT tb.*
+        FROM IE_TableCT AS tb
+        LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
+        ORDER BY tb.CreatedAt`,
+      {
+        type: QueryTypes.SELECT,
+      },
+    );
+
+    const groupedMap = new Map<string, Section>();
+
+    for (const item of records) {
+      const { No, ProgressStagePartName, Area, Nva, Va, Loss, MachineType } =
+        item;
+
+      const vaData = JSON.parse(Va) as ITablectType;
+      const nvaData = JSON.parse(Nva) as ITablectType;
+
+      const vaAvgCT = vaData.Average;
+      const nvaAvgCT = nvaData.Average;
+      const totalCT = vaAvgCT + nvaAvgCT;
+
+      if (!groupedMap.has(Area)) {
+        groupedMap.set(Area, {
+          title: Area,
+          rows: [],
+          CT: 0,
+          PP: 0,
+        });
+      }
+
+      const section = groupedMap.get(Area)!;
+
+      section.rows.push({
+        no: No,
+        operation: ProgressStagePartName,
+        va: vaAvgCT,
+        nvan: nvaAvgCT,
+        ct: totalCT,
+        loss: Loss,
+        machineType: MachineType,
+      });
+
+      section.CT += totalCT;
+      section.PP =
+        section.CT === 0 ? 0 : Number((27000 / section.CT).toFixed(1));
+    }
+
+    const lsaData: Section[] = Array.from(groupedMap.values());
+
+    let startRow = 8;
+
+    lsaData.forEach((items) => {
+      worksheet.mergeCells(`A${startRow}:M${startRow}`);
+      worksheet.getCell(`A${startRow}`).value = items.title;
+
+      startRow++;
+
+      items.rows.forEach((item) => {
+        worksheet.getCell(`A${startRow}`).value = item.no;
+        worksheet.getCell(`B${startRow}`).value = item.operation;
+        worksheet.getCell(`C${startRow}`).value = item.va;
+        worksheet.getCell(`D${startRow}`).value = item.nvan;
+        worksheet.getCell(`E${startRow}`).value = item.loss;
+        worksheet.getCell(`F${startRow}`).value = item.ct;
+        worksheet.getCell(`M${startRow}`).value = item.machineType;
+
+        worksheet.getRow(startRow).height = 24;
+        startRow++;
+      });
+      // Ghi CT
+      worksheet.getCell(`D${startRow}`).value = 'CT';
+      worksheet.getCell(`E${startRow}`).value = items.CT;
+      startRow++;
+
+      // Ghi PP
+      worksheet.getCell(`D${startRow}`).value = 'PP';
+      worksheet.getCell(`E${startRow}`).value = items.PP;
+      startRow++;
+    });
+    const total = lsaData.reduce((prev, curr) => prev + curr.CT, 0);
+    worksheet.getCell(`D${startRow}`).value = 'TOTAL:';
+    worksheet.getCell(`E${startRow}`).value = total;
+    startRow++;
+
+    worksheet.getCell(`D${startRow}`).value = 'PP:';
+    worksheet.getCell(`E${startRow}`).value =
+      total === 0 ? 0 : Number((27000 / total).toFixed(1));
+    startRow++;
+
     return await workbook.xlsx.writeBuffer();
   }
 }
