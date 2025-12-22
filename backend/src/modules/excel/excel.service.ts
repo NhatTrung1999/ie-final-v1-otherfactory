@@ -1107,4 +1107,108 @@ export class ExcelService {
     }
     return await workbook.xlsx.writeBuffer();
   }
+
+  //Test LSA
+  async exportLSATest(
+    DateFrom: string,
+    DateTo: string,
+    Season: string,
+    Stage: string,
+    Area: string,
+    Article: string,
+    Account: string,
+  ) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('LSA Test');
+
+    worksheet.mergeCells('A1:M1');
+    worksheet.getCell('A1').value =
+      'LABOR STANDARD ADVICE \nBẢNG ĐỊNH MỨC LAO ĐỘNG - 工時定量表';
+    worksheet.properties.defaultRowHeight = 24;
+
+    worksheet.getCell('A1').style = {
+      alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
+      font: { name: 'Times New Roman', family: 2, bold: true, size: 14 },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'ffd966' },
+      },
+    };
+    for (let col = 1; col <= 13; col++) {
+      const cell = worksheet.getCell(1, col);
+      cell.border = {
+        top: { style: 'thin' },
+        right: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+      };
+    }
+    worksheet.getCell('O1').value = 'Unit 單位';
+    worksheet.getCell('P1').value = 'Time (second) 時間';
+    worksheet.getCell('Q1').value = 'Pair/Person/8h 雙數/人/8h';
+    worksheet.getCell('R1').value = 'Manpower Standard labor';
+    worksheet.getCell('S1').value = 'Manpower Actual labor';
+    worksheet.getCell('T1').value = 'LLER% C2B';
+
+    worksheet.getRow(1).height = 42;
+
+    worksheet.getCell('A2').value = 'Model /Article';
+    worksheet.mergeCells('C2:F2');
+    worksheet.mergeCells('G2:M2');
+    worksheet.getCell('C2').value = 'Date-測時日期 Ngày kiểm';
+    worksheet.getCell('O2').value = '(Cutting)裁斷 - Chặt';
+
+    worksheet.getCell('A3').value = 'Cut die:斬刀';
+    worksheet.mergeCells('C3:F3');
+    worksheet.mergeCells('G3:M3');
+    worksheet.getCell('C3').value =
+      'Estimate output:預計產量 Sản lương dư tinh';
+    worksheet.getCell('O3').value = '(Stitching)針車 - May';
+
+    worksheet.getCell('A4').value = 'Block/ Line: 測時組別:';
+    worksheet.mergeCells('C4:F4');
+    worksheet.mergeCells('G4:M4');
+    worksheet.getCell('C4').value = 'Working time: 工作時間 Tgian làm việc';
+    worksheet.getCell('O4').value = '(C+S)裁斷+針車 - Chặt + May';
+
+    worksheet.getCell('A5').value = 'PPH';
+    worksheet.mergeCells('C5:F5');
+    worksheet.mergeCells('G5:M5');
+    worksheet.getCell('C5').value = 'Tatk time';
+    worksheet.getCell('O5').value = '(F+A)成型+包裝 - Gò+ Bao bì';
+    worksheet.getCell('O6').value = '(C2B)裁斷+針車+成型+包裝 - C+M+G+BB';
+    worksheet.getCell('O7:Q7');
+    worksheet.getCell('O7').value = 'LC (C2B)';
+
+    worksheet.mergeCells('A6:A7');
+    worksheet.mergeCells('B6:B7');
+    worksheet.mergeCells('G6:G7');
+    worksheet.mergeCells('H6:H7');
+    worksheet.mergeCells('I6:I7');
+    worksheet.mergeCells('J6:J7');
+    worksheet.mergeCells('K6:K7');
+    worksheet.mergeCells('L6:L7');
+    worksheet.mergeCells('M6:M7');
+    worksheet.mergeCells('C6:F6');
+
+    worksheet.getCell('A6').value = 'No 序號';
+    worksheet.getCell('B6').value = 'Operation-操作名稱 (Tên công đoạn)';
+    worksheet.getCell('C6').value = 'Standard 標準工時 Tgian chuẩn';
+    worksheet.getCell('G6').value = 'Standard Labor 需求人力 Số LĐ chuẩn';
+    worksheet.getCell('H6').value =
+      'Allocated Labor  分配勞動人數 Số LĐ phân bổ';
+    worksheet.getCell('I6').value = 'Line balance 人均工時';
+    worksheet.getCell('J6').value = 'Multi-skill';
+    worksheet.getCell('K6').value = 'Capacity 標產(雙) Sản lượng 1H';
+    worksheet.getCell('L6').value = 'Actual  Labor 實際人力 Số LĐ t.tế';
+    worksheet.getCell('M6').value = 'Remark 備註 Chi chú';
+
+    worksheet.getCell('C7').value = 'VA';
+    worksheet.getCell('D7').value = 'NVA';
+    worksheet.getCell('E7').value = 'LOSS';
+    worksheet.getCell('F7').value = 'CT';
+
+    return await workbook.xlsx.writeBuffer();
+  }
 }

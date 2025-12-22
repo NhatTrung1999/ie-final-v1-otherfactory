@@ -150,6 +150,7 @@ const Login = () => {
                 <option value="">Choose option</option>
                 <option value="FF28">FF28</option>
                 <option value="COSTING">COSTING</option>
+                <option value="LSA">LSA</option>
               </select>
               {formik.touched.category && formik.errors.category ? (
                 <div className="text-red-500 text-sm mt-1">

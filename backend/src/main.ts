@@ -35,6 +35,6 @@ async function bootstrap() {
   //   prefix: '/uploads/',
   // });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(port ?? 6868);
+  await app.listen(port ?? 6869);
 }
 bootstrap();
