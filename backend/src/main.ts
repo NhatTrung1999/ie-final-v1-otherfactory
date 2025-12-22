@@ -11,9 +11,19 @@ async function bootstrap() {
   app.enableCors();
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
+  // const uploadPath =
+  //   configService.get<string>('UPLOAD_DESTINATION') ||
+  //   '\\192.168.0.102\\cie\\IE_VIDEO';
+
+  // const uploadPath =
+  //   configService.get<string>('UPLOAD_DESTINATION') ||
+  //   '\\192.168.30.9\\cime\\IE_VIDEO';
+  // const uploadPath =
+  //   configService.get<string>('UPLOAD_DESTINATION') ||
+  //   '\\192.168.55.3\\lym\\ME\\IE_VIDEO';
   const uploadPath =
     configService.get<string>('UPLOAD_DESTINATION') ||
-    '\\192.168.0.102\\cie\\IE_VIDEO';
+    '\\192.168.60.6\\tyxuan2\\ME\\IE_VIDEO';
 
   if (fs.existsSync(uploadPath)) {
     app.use('/IE_VIDEO', express.static(uploadPath));

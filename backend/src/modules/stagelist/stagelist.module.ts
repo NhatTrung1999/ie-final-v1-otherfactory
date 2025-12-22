@@ -19,7 +19,10 @@ import * as path from 'path';
           destination: (req, file, cb) => {
             const { date, season, stage, area, article } =
               req.body as CreateStagelistDto;
-            const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.0.102\\cie\\IE_VIDEO'}`;
+            // const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.0.102\\cie\\IE_VIDEO'}`;
+            // const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.30.9\\cime\\IE_VIDEO'}`;
+            // const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.55.3\\lym\\ME\\IE_VIDEO'}`;
+            const basePath = `${configService.get('UPLOAD_DESTINATION') || '\\192.168.60.6\\tyxuan2\\ME\\IE_VIDEO'}`;
             const targetPath = path.join(
               basePath,
               date,
@@ -39,9 +42,19 @@ import * as path from 'path';
             const ext = path.extname(file.originalname);
             const baseName = path.basename(file.originalname, ext);
             // const destination = `${configService.get('UPLOAD_DESTINATION') || './uploads'}/${date}/${season}/${stage}/${area}/${article}`;
+            // const basePath =
+            //   configService.get<string>('UPLOAD_DESTINATION') ||
+            //   '\\192.168.0.102\\cie\\IE_VIDEO';
+            // const basePath =
+            //   configService.get<string>('UPLOAD_DESTINATION') ||
+            //   '\\192.168.30.9\\cime\\IE_VIDEO';
+            // const basePath =
+            //   configService.get<string>('UPLOAD_DESTINATION') ||
+            //   '\\192.168.55.3\\lym\\ME\\IE_VIDEO';
             const basePath =
               configService.get<string>('UPLOAD_DESTINATION') ||
-              '\\192.168.0.102\\cie\\IE_VIDEO';
+              '\\192.168.60.6\\tyxuan2\\ME\\IE_VIDEO';
+
             const targetPath = path.join(
               basePath,
               date,

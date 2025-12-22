@@ -32,9 +32,18 @@ export class StagelistService {
       const { userId, factory } = user;
       let resData: IStageListData[] = [];
 
+      // const networkPath =
+      //   this.configService.get<string>('UPLOAD_DESTINATION') ||
+      //   '\\192.168.0.102\\cie\\IE_VIDEO';
+      // const networkPath =
+      //   this.configService.get<string>('UPLOAD_DESTINATION') ||
+      //   '\\192.168.30.9\\cime\\IE_VIDEO';
+      // const networkPath =
+      //   this.configService.get<string>('UPLOAD_DESTINATION') ||
+      //   '\\192.168.55.3\\lym\\ME\\IE_VIDEO';
       const networkPath =
         this.configService.get<string>('UPLOAD_DESTINATION') ||
-        '\\192.168.0.102\\cie\\IE_VIDEO';
+        '\\192.168.60.6\\tyxuan2\\ME\\IE_VIDEO';
 
       // const basePath = path.join(
       //   process.cwd(),
