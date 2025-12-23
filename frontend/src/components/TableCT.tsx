@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, type MouseEvent } from 'react';
+import React, { Fragment, useEffect, useState, type MouseEvent } from 'react';
 import Select, { type SingleValue } from 'react-select';
 import {
   TABLE_HEADER,
@@ -28,6 +28,7 @@ import {
 import excelApi from '../api/excelApi';
 import { toast } from 'react-toastify';
 import { historyplaybackDeleteMultiple } from '../features/historyplayback/historyplaybackSlice';
+import ModalEstimateOutput from './ModalEstimateOutput';
 
 const TableCT = () => {
   const { tablect, activeColId, machineTypes, selectedMachineType } =
@@ -39,6 +40,7 @@ const TableCT = () => {
   const { auth } = useAppSelector((state) => state.auth);
   const category = localStorage.getItem('category');
   const dispatch = useAppDispatch();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     dispatch(getData({ ...filter }));
@@ -134,30 +136,31 @@ const TableCT = () => {
   };
 
   const handleExcelLSA = async () => {
-    const isConfirm = tablect.every((item) => item.ConfirmId !== null);
+    setIsOpen(true);
+    // const isConfirm = tablect.every((item) => item.ConfirmId !== null);
 
-    if (isConfirm) {
-      try {
-        const res = await excelApi.exportLSA({
-          ...filter,
-          Account: auth?.UserID,
-        });
-        const url = URL.createObjectURL(new Blob([res]));
+    // if (isConfirm) {
+    //   try {
+    //     const res = await excelApi.exportLSA({
+    //       ...filter,
+    //       Account: auth?.UserID,
+    //     });
+    //     const url = URL.createObjectURL(new Blob([res]));
 
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'Excel LSA.xlsx');
-        document.body.appendChild(link);
-        link.click();
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.setAttribute('download', 'Excel LSA.xlsx');
+    //     document.body.appendChild(link);
+    //     link.click();
 
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      toast.warn('Please confirm your userId before export excel!');
-    }
+    //     document.body.removeChild(link);
+    //     window.URL.revokeObjectURL(url);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // } else {
+    //   toast.warn('Please confirm your userId before export excel!');
+    // }
   };
 
   const handleExcelTimeStudy = async () => {
@@ -275,234 +278,250 @@ const TableCT = () => {
   };
 
   return (
-    <div className="mt-2 border border-gray-500">
-      <div className="bg-gray-500 text-white">
-        <div className="px-2 py-2 flex items-center justify-between">
-          <div className="font-bold">TableCT</div>
-          <div className="flex items-center gap-2">
-            <button
-              className={`bg-red-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? 'cursor-not-allowed opacity-70'
-                  : 'cursor-pointer hover:opacity-70'
-              }`}
-              onClick={handleSync}
-              disabled={
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? true
-                  : false
-              }
-            >
-              Refresh
-            </button>
-            <button
-              className={`bg-blue-500 px-2 py-1 font-semibold rounded-md  ${
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? 'cursor-not-allowed opacity-70'
-                  : 'cursor-pointer hover:opacity-70'
-              }`}
-              onClick={handleConfirm}
-              disabled={
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? true
-                  : false
-              }
-            >
-              Confirm
-            </button>
-            <button
-              className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? 'cursor-not-allowed opacity-70'
-                  : 'cursor-pointer hover:opacity-70'
-              }`}
-              onClick={handleExcelLSA}
-              disabled={
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? true
-                  : false
-              }
-            >
-              Excel LSA
-            </button>
-            <button
-              className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? 'cursor-not-allowed opacity-70'
-                  : 'cursor-pointer hover:opacity-70'
-              }`}
-              onClick={handleExcelTimeStudy}
-              disabled={
-                tablect
-                  .filter((item) => item.Area === activeTabId)
-                  .filter((item) => item.CreatedBy === auth?.UserID).length ===
-                0
-                  ? true
-                  : false
-              }
-            >
-              Excel Time Study
-            </button>
+    <>
+      <div className="mt-2 border border-gray-500">
+        <div className="bg-gray-500 text-white">
+          <div className="px-2 py-2 flex items-center justify-between">
+            <div className="font-bold">TableCT</div>
+            <div className="flex items-center gap-2">
+              <button
+                className={`bg-red-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? 'cursor-not-allowed opacity-70'
+                    : 'cursor-pointer hover:opacity-70'
+                }`}
+                onClick={handleSync}
+                disabled={
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? true
+                    : false
+                }
+              >
+                Refresh
+              </button>
+              <button
+                className={`bg-blue-500 px-2 py-1 font-semibold rounded-md  ${
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? 'cursor-not-allowed opacity-70'
+                    : 'cursor-pointer hover:opacity-70'
+                }`}
+                onClick={handleConfirm}
+                disabled={
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? true
+                    : false
+                }
+              >
+                Confirm
+              </button>
+              <button
+                className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? 'cursor-not-allowed opacity-70'
+                    : 'cursor-pointer hover:opacity-70'
+                }`}
+                onClick={handleExcelLSA}
+                disabled={
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? true
+                    : false
+                }
+              >
+                Excel LSA
+              </button>
+              <button
+                className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? 'cursor-not-allowed opacity-70'
+                    : 'cursor-pointer hover:opacity-70'
+                }`}
+                onClick={handleExcelTimeStudy}
+                disabled={
+                  tablect
+                    .filter((item) => item.Area === activeTabId)
+                    .filter((item) => item.CreatedBy === auth?.UserID)
+                    .length === 0
+                    ? true
+                    : false
+                }
+              >
+                Excel Time Study
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="w-full overflow-x-auto max-h-[450px]">
-        <table className="w-full min-w-max">
-          <thead className=" bg-gray-400 sticky top-0 text-white z-10">
-            {TABLE_HEADER.map((item, i) => (
-              <tr key={i}>
-                <th className="px-4 py-4">{item.No}</th>
-                <th className="px-4 py-4">{item.ProgressStagePartName}</th>
-                <th className="px-4 py-4">{item.Type}</th>
-                {Array.from({ length: item.Cts }).map((_, i) => (
-                  <th key={i} className="px-4 py-4">
-                    CT{i + 1}
-                  </th>
-                ))}
-                <th className="px-4 py-4">{item.Average}</th>
-                <th className="px-4 py-4">{item.MachineType}</th>
-                <th className="px-4 py-4">{item.Confirm}</th>
-                <th className="px-4 py-4">{item.Action}</th>
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {tablect
-              .filter((item) => item.Area === activeTabId)
-              .filter((item) => item.CreatedBy === auth?.UserID)
-              .map((item) => (
-                <Fragment key={item.Id}>
-                  <tr
-                    className={`cursor-pointer ${
-                      item.Id === activeItemId ? 'bg-gray-300' : ''
-                    }`}
-                    onClick={() => handleClickRow(item)}
-                  >
-                    <td
-                      className="text-center border border-l-0 border-t-0 border-gray-400"
-                      rowSpan={2}
-                    >
-                      {item.No}
-                    </td>
-                    <td
-                      className="text-center border border-t-0 border-gray-400"
-                      rowSpan={2}
-                    >
-                      {item.ProgressStagePartName}
-                    </td>
-                    <td className="text-center border border-t-0 border-gray-400">
-                      {item.Nva.Type}
-                    </td>
-                    {item.Nva.Cts.map((ct, i) => (
-                      <td
-                        className={`text-center border border-t-0 border-gray-400 ${
-                          `${item.Id}_${i}` === activeColId
-                            ? 'bg-amber-200'
-                            : ''
-                        }`}
-                        key={i}
-                        onClick={(e) =>
-                          handleClickColumn(e, `${item.Id}_${i}`, item.Id, item)
-                        }
-                      >
-                        {Number(ct.toFixed(2))}
-                      </td>
-                    ))}
-                    <td className="text-center border border-t-0 border-gray-400">
-                      {item.Nva.Average}
-                    </td>
-                    <td
-                      className="text-center border border-t-0 border-gray-400 px-2"
-                      rowSpan={2}
-                    >
-                      {item.MachineType ? (
-                        item.MachineType
-                      ) : (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            isDisabled={handleCheckDisabled(item)}
-                            options={machineTypes}
-                            menuPlacement="auto"
-                            menuPortalTarget={document.body}
-                            menuPosition="absolute"
-                            styles={{
-                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                            }}
-                            onChange={(e) =>
-                              handleChangeMachineType(e, item.Id)
-                            }
-                          />
-                        </div>
-                      )}
-                    </td>
-                    <td
-                      className="text-center border border-t-0 border-gray-400"
-                      rowSpan={2}
-                    >
-                      {item.ConfirmId}
-                    </td>
-                    <td
-                      className="text-center border border-r-0 border-t-0 border-gray-400 p-2"
-                      rowSpan={2}
-                    >
-                      {handleCheckAction(item)}
-                    </td>
-                  </tr>
-                  <tr
-                    className={`cursor-pointer ${
-                      item.Id === activeItemId ? 'bg-gray-300' : ''
-                    }`}
-                    onClick={() => handleClickRow(item)}
-                  >
-                    <td className="text-center border border-t-0 border-gray-400">
-                      {item.Va.Type}
-                    </td>
-                    {item.Va.Cts.map((ct, i) => (
-                      <td
-                        className={`text-center border border-t-0 border-gray-400 ${
-                          `${item.Id}_${i}` === activeColId
-                            ? 'bg-amber-200'
-                            : ''
-                        }`}
-                        key={i}
-                        onClick={(e) =>
-                          handleClickColumn(e, `${item.Id}_${i}`, item.Id, item)
-                        }
-                      >
-                        {Number(ct.toFixed(2))}
-                      </td>
-                    ))}
-                    <td className="text-center border border-t-0 border-gray-400">
-                      {item.Va.Average}
-                    </td>
-                  </tr>
-                </Fragment>
+        <div className="w-full overflow-x-auto max-h-[450px]">
+          <table className="w-full min-w-max">
+            <thead className=" bg-gray-400 sticky top-0 text-white z-10">
+              {TABLE_HEADER.map((item, i) => (
+                <tr key={i}>
+                  <th className="px-4 py-4">{item.No}</th>
+                  <th className="px-4 py-4">{item.ProgressStagePartName}</th>
+                  <th className="px-4 py-4">{item.Type}</th>
+                  {Array.from({ length: item.Cts }).map((_, i) => (
+                    <th key={i} className="px-4 py-4">
+                      CT{i + 1}
+                    </th>
+                  ))}
+                  <th className="px-4 py-4">{item.Average}</th>
+                  <th className="px-4 py-4">{item.MachineType}</th>
+                  <th className="px-4 py-4">{item.Confirm}</th>
+                  <th className="px-4 py-4">{item.Action}</th>
+                </tr>
               ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tablect
+                .filter((item) => item.Area === activeTabId)
+                .filter((item) => item.CreatedBy === auth?.UserID)
+                .map((item) => (
+                  <Fragment key={item.Id}>
+                    <tr
+                      className={`cursor-pointer ${
+                        item.Id === activeItemId ? 'bg-gray-300' : ''
+                      }`}
+                      onClick={() => handleClickRow(item)}
+                    >
+                      <td
+                        className="text-center border border-l-0 border-t-0 border-gray-400"
+                        rowSpan={2}
+                      >
+                        {item.No}
+                      </td>
+                      <td
+                        className="text-center border border-t-0 border-gray-400"
+                        rowSpan={2}
+                      >
+                        {item.ProgressStagePartName}
+                      </td>
+                      <td className="text-center border border-t-0 border-gray-400">
+                        {item.Nva.Type}
+                      </td>
+                      {item.Nva.Cts.map((ct, i) => (
+                        <td
+                          className={`text-center border border-t-0 border-gray-400 ${
+                            `${item.Id}_${i}` === activeColId
+                              ? 'bg-amber-200'
+                              : ''
+                          }`}
+                          key={i}
+                          onClick={(e) =>
+                            handleClickColumn(
+                              e,
+                              `${item.Id}_${i}`,
+                              item.Id,
+                              item
+                            )
+                          }
+                        >
+                          {Number(ct.toFixed(2))}
+                        </td>
+                      ))}
+                      <td className="text-center border border-t-0 border-gray-400">
+                        {item.Nva.Average}
+                      </td>
+                      <td
+                        className="text-center border border-t-0 border-gray-400 px-2"
+                        rowSpan={2}
+                      >
+                        {item.MachineType ? (
+                          item.MachineType
+                        ) : (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Select
+                              isDisabled={handleCheckDisabled(item)}
+                              options={machineTypes}
+                              menuPlacement="auto"
+                              menuPortalTarget={document.body}
+                              menuPosition="absolute"
+                              styles={{
+                                menuPortal: (base) => ({
+                                  ...base,
+                                  zIndex: 9999,
+                                }),
+                              }}
+                              onChange={(e) =>
+                                handleChangeMachineType(e, item.Id)
+                              }
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td
+                        className="text-center border border-t-0 border-gray-400"
+                        rowSpan={2}
+                      >
+                        {item.ConfirmId}
+                      </td>
+                      <td
+                        className="text-center border border-r-0 border-t-0 border-gray-400 p-2"
+                        rowSpan={2}
+                      >
+                        {handleCheckAction(item)}
+                      </td>
+                    </tr>
+                    <tr
+                      className={`cursor-pointer ${
+                        item.Id === activeItemId ? 'bg-gray-300' : ''
+                      }`}
+                      onClick={() => handleClickRow(item)}
+                    >
+                      <td className="text-center border border-t-0 border-gray-400">
+                        {item.Va.Type}
+                      </td>
+                      {item.Va.Cts.map((ct, i) => (
+                        <td
+                          className={`text-center border border-t-0 border-gray-400 ${
+                            `${item.Id}_${i}` === activeColId
+                              ? 'bg-amber-200'
+                              : ''
+                          }`}
+                          key={i}
+                          onClick={(e) =>
+                            handleClickColumn(
+                              e,
+                              `${item.Id}_${i}`,
+                              item.Id,
+                              item
+                            )
+                          }
+                        >
+                          {Number(ct.toFixed(2))}
+                        </td>
+                      ))}
+                      <td className="text-center border border-t-0 border-gray-400">
+                        {item.Va.Average}
+                      </td>
+                    </tr>
+                  </Fragment>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+      {isOpen && <ModalEstimateOutput setIsOpen={setIsOpen} />}
+    </>
   );
 };
 

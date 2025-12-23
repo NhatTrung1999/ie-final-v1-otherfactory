@@ -133,7 +133,10 @@ const tablectSlice = createSlice({
       action: PayloadAction<{ category: string | null; payload: ITableData }>
     ) => {
       const { category, payload } = action.payload;
-      if (category === 'FF28') {
+      if (
+        category?.trim().toLowerCase() === 'FF28'.trim().toLowerCase() ||
+        category?.trim().toLowerCase() === 'LSA'.trim().toLowerCase()
+      ) {
         const totalNva = payload.Nva.Cts.filter((item) => item > 0) || 0;
         const totalVa = payload.Va.Cts.filter((item) => item > 0) || 0;
         const avgNva =
