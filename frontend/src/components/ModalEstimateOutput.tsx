@@ -8,11 +8,15 @@ type Props = {
   activeColId?: string | null;
 };
 
+const WORKING_TIME = 27000;
+const TOTAL_CT = 26.8;
+// const EFFICIENCY = 100;
+
 type EstimateFormValues = {
   estimateOutput: number | '';
 };
 
-const initialValues: EstimateFormValues  = {
+const initialValues: EstimateFormValues = {
   estimateOutput: '',
 };
 
@@ -23,17 +27,32 @@ const validationSchema = Yup.object({
     .min(1, 'Must be greater than 0'),
 });
 
-const ModalEstimateOutput = ({ setIsOpen, activeColId }: Props) => {
-  const { types } = useAppSelector((state) => state.controlpanel);
-  const dispatch = useAppDispatch();
+const ModalEstimateOutput = ({ setIsOpen }: Props) => {
+  const { tablect } = useAppSelector((state) => state.tablect);
+  // const dispatch = useAppDispatch();
 
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (data) => {
-      console.log(data);
+      // console.log(data);
+      // console.log(tablect.reduce((prev, curr) => Number(curr.Nva.Average) + Number(curr.Va.Average) +prev), 0);
     },
   });
+
+  const totalCT = tablect.reduce(
+    (sum, item) => sum + item.Va.Average + item.Nva.Average,
+    0
+  );
+
+  const tatkTime =
+    Number(formik.values.estimateOutput) > 0
+      ? (3600 / Number(formik.values.estimateOutput)).toFixed(0)
+      : 0;
+
+  const manpower = Number(tatkTime) > 0 ? Math.ceil(totalCT / +tatkTime) : 0;
+
+  const capacity = totalCT > 0 ? 3600 / totalCT : 0;
 
   return (
     <div className="fixed bg-transparent inset-0 flex justify-center items-center z-50">
@@ -50,7 +69,7 @@ const ModalEstimateOutput = ({ setIsOpen, activeColId }: Props) => {
               htmlFor="estimateOutput"
               className="block mb-1 text-base font-medium text-gray-700"
             >
-              Estimate Output (pairs / shift)
+              Estimate Output (pairs)
             </label>
             <input
               type="number"
@@ -68,6 +87,35 @@ const ModalEstimateOutput = ({ setIsOpen, activeColId }: Props) => {
                 {formik.errors.estimateOutput}
               </div>
             ) : null}
+          </div>
+          <div className="text-sm text-gray-600 flex justify-between items-center">
+            <div>
+              Working Time: <b>{WORKING_TIME.toLocaleString()} sec</b>
+            </div>
+            <div>
+              Tatk Time: <b>{tatkTime} sec</b>
+            </div>
+          </div>
+          <hr className="border-gray-200" />
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Total CT</span>
+              <span>{totalCT} sec</span>
+            </div>
+            <hr className="border-dashed border-gray-200" />
+
+            <div className="flex justify-between items-center">
+              <span>Manpower Standard labor</span>
+              <span className="font-medium text-blue-600">
+                {manpower} persons
+              </span>
+            </div>
+
+            <hr className="border-dashed border-gray-200" />
+            <div className="flex justify-between">
+              <span>Capacity</span>
+              <span>{capacity.toFixed(0)} pairs/hour</span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button

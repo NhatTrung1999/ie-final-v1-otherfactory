@@ -23,6 +23,31 @@ export interface Section {
   PP: number;
 }
 
+export interface RowLSA {
+  no: string;
+  operation: string;
+  va: number;
+  nvan: number;
+  ct: number;
+  standardLabor: number;
+  allocatedLabor: number;
+  capacity: number;
+  actualLabor: number;
+  lineBalance: number;
+  loss: string;
+  machineType?: string;
+}
+
+export interface SectionLSA {
+  title: string;
+  rows: RowLSA[];
+  TotalVA: number
+  CT: number;
+  PP: number;
+  TotalLineBalance: number
+  TotalActualLabor: number
+}
+
 export interface CTData {
   CT1: number;
   CT2: number;
