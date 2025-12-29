@@ -1151,50 +1151,6 @@ export class ExcelService {
         left: { style: 'thin' },
       };
     }
-    worksheet.getCell('O1').value = 'Unit \n單位';
-    worksheet.getCell('P1').value = 'Time (second) 時間';
-    worksheet.getCell('Q1').value = 'Pair/Person/8h 雙數/人/8h';
-    worksheet.getCell('R1').value = 'Manpower Standard labor';
-    worksheet.getCell('S1').value = 'Manpower Actual labor';
-    worksheet.getCell('T1').value = 'LLER% C2B';
-    ['O', 'P', 'Q', 'R', 'S', 'T'].forEach((item) => {
-      worksheet.getColumn(item).width = 12;
-      worksheet.getCell(`${item}1`).style = {
-        alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
-        font: { name: 'Times New Roman', bold: true, size: 11 },
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'ffd966' },
-        },
-        border: {
-          top: { style: 'thin' },
-          right: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-        },
-      };
-    });
-
-    for (let row = 2; row <= 6; row++) {
-      for (let col = 15; col <= 20; col++) {
-        worksheet.getRow(row).height = 40;
-        worksheet.getCell(row, col).style = {
-          alignment: {
-            wrapText: true,
-            vertical: 'middle',
-            horizontal: 'center',
-          },
-          font: { name: 'Times New Roman', bold: true, size: 11 },
-          border: {
-            top: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-        };
-      }
-    }
 
     worksheet.getRow(1).height = 50;
 
@@ -1202,7 +1158,6 @@ export class ExcelService {
     worksheet.mergeCells('C2:F2');
     worksheet.mergeCells('G2:M2');
     worksheet.getCell('C2').value = 'Date-測時日期 \nNgày kiểm';
-    worksheet.getCell('O2').value = '(Cutting)裁斷 - Chặt';
 
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
@@ -1228,7 +1183,6 @@ export class ExcelService {
     worksheet.mergeCells('G3:M3');
     worksheet.getCell('C3').value =
       'Estimate output:\n預計產量 \nSản lương dư tinh';
-    worksheet.getCell('O3').value = '(Stitching)針車 - May';
 
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
@@ -1253,7 +1207,6 @@ export class ExcelService {
     worksheet.mergeCells('C4:F4');
     worksheet.mergeCells('G4:M4');
     worksheet.getCell('C4').value = 'Working time: 工作時間 \nTgian làm việc';
-    worksheet.getCell('O4').value = '(C+S)裁斷+針車 - Chặt + May';
 
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
@@ -1278,7 +1231,6 @@ export class ExcelService {
     worksheet.mergeCells('C5:F5');
     worksheet.mergeCells('G5:M5');
     worksheet.getCell('C5').value = 'Tatk time';
-    worksheet.getCell('O5').value = '(F+A)成型+包裝 - Gò+ Bao bì';
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
         worksheet.getCell(`${item}5`).style = {
@@ -1297,23 +1249,6 @@ export class ExcelService {
         };
       },
     );
-
-    worksheet.getCell('O6').value = '(C2B)裁斷+針車+成型+包裝 - C+M+G+BB';
-    worksheet.mergeCells('O7:Q7');
-    worksheet.getCell('O7').value = 'LC (C2B)';
-    worksheet.mergeCells('R7:T7');
-    ['O', 'P', 'Q', 'R', 'S', 'T'].forEach((item) => {
-      worksheet.getCell(`${item}7`).style = {
-        alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
-        font: { name: 'Times New Roman', bold: true, size: 11 },
-        border: {
-          top: { style: 'thin' },
-          right: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-        },
-      };
-    });
 
     worksheet.mergeCells('A6:A7');
     worksheet.mergeCells('B6:B7');
@@ -1448,53 +1383,54 @@ export class ExcelService {
     let startRow = 8;
 
     lsaData.forEach((items) => {
+      let titleArea = '';
+      switch (items.title.trim().toLowerCase()) {
+        case 'cutting':
+          titleArea = 'VA CHẶT';
+          break;
+        case 'stitching':
+          titleArea = 'TỔNG VA MAY';
+          break;
+        case 'assembly':
+          titleArea = 'TỔNG VA GÒ';
+          break;
+        default:
+          titleArea = '';
+          break;
+      }
       worksheet.mergeCells(`A${startRow}:M${startRow}`);
+      worksheet.getCell(`A${startRow}`).value = items.title;
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
+        (item) => {
+          worksheet.getCell(`${item}${startRow}`).style = {
+            alignment: {
+              wrapText: true,
+              vertical: 'middle',
+              horizontal: 'center',
+            },
+            font: {
+              name: 'Times New Roman',
+              bold: true,
+              size: item === 'A' ? 12 : 11,
+            },
+            fill: {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'ffd966' },
+            },
+            border: {
+              top: { style: 'thin' },
+              right: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+            },
+          };
+        },
+      );
+
       worksheet.mergeCells(`O${startRow}:P${startRow}`);
       worksheet.getCell(`O${startRow}`).value = items.title;
       worksheet.getCell(`Q${startRow}`).value = 'SỐ LƯỢNG';
-      worksheet.getCell(`A${startRow}`).value = items.title;
-      [
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'O',
-        'P',
-        'Q',
-      ].forEach((item) => {
-        worksheet.getCell(`${item}${startRow}`).style = {
-          alignment: {
-            wrapText: true,
-            vertical: 'middle',
-            horizontal: 'center',
-          },
-          font: {
-            name: 'Times New Roman',
-            bold: true,
-            size: item === 'A' ? 12 : 11,
-          },
-          fill: {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'ffd966' },
-          },
-          border: {
-            top: { style: 'thin' },
-            right: { style: 'thin' },
-            bottom: { style: 'thin' },
-            left: { style: 'thin' },
-          },
-        };
-      });
       startRow++;
 
       items.rows.forEach((item) => {
@@ -1544,13 +1480,16 @@ export class ExcelService {
         worksheet.getRow(startRow).height = 24;
         startRow++;
       });
-      worksheet.getCell(`B${startRow}`).value = 'VA CHẶT';
+
+      worksheet.getCell(`B${startRow}`).value = titleArea;
       worksheet.getCell(`C${startRow}`).value = items.TotalVA;
       worksheet.getCell(`F${startRow}`).value = items.CT;
       worksheet.getCell(`G${startRow}`).value = 'CT';
       worksheet.getCell(`I${startRow}`).value = items.TotalLineBalance;
+      worksheet.getCell(`J${startRow}`).value =
+        items.title.trim().toLowerCase() !== 'cutting' ? 0.0 : '';
       worksheet.getCell(`L${startRow}`).value = items.TotalActualLabor;
-      ['B', 'C', 'F', 'G', 'I', 'L'].forEach((col) => {
+      ['B', 'C', 'F', 'G', 'I', 'J', 'L'].forEach((col) => {
         worksheet.getCell(`${col}${startRow}`).style = {
           alignment: {
             wrapText: true,
@@ -1587,51 +1526,24 @@ export class ExcelService {
       startRow++;
     });
 
-    // worksheet.getCell(`B${startRow}`).value = 'VA CHẶT';
-    // worksheet.getCell(`C${startRow}`).value = '0.0';
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'CT';
-    // worksheet.getCell(`I${startRow}`).value = '0.0';
-    // worksheet.getCell(`L${startRow}`).value = '0';
-    // startRow++;
-
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'PP';
-    // startRow++;
-
-    // worksheet.getCell(`B${startRow}`).value = 'TỔNG VA MAY';
-    // worksheet.getCell(`C${startRow}`).value = '0.0';
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'CT';
-    // worksheet.getCell(`I${startRow}`).value = '0.0';
-    // worksheet.getCell(`J${startRow}`).value = '0.0';
-    // worksheet.getCell(`L${startRow}`).value = '0';
-    // startRow++;
-
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'PP';
-    // startRow++;
-
-    // worksheet.getCell(`B${startRow}`).value = 'TỔNG VA GÒ';
-    // worksheet.getCell(`C${startRow}`).value = '0.0';
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'CT';
-    // worksheet.getCell(`I${startRow}`).value = '0.0';
-    // worksheet.getCell(`J${startRow}`).value = '0.0';
-    // worksheet.getCell(`L${startRow}`).value = '0';
-    // startRow++;
-
-    // worksheet.getCell(`F${startRow}`).value = '0.0';
-    // worksheet.getCell(`G${startRow}`).value = 'PP';
-    // startRow++;
+    const totalAllVA = lsaData.reduce((prev, curr) => prev + curr.TotalVA, 0);
+    const totalAllCT = lsaData.reduce((prev, curr) => prev + curr.CT, 0);
+    const totalAllLineBalance = lsaData.reduce(
+      (prev, curr) => prev + curr.TotalLineBalance,
+      0,
+    );
+    const totalAllActualLabor = lsaData.reduce(
+      (prev, curr) => prev + curr.TotalActualLabor,
+      0,
+    );
 
     worksheet.getCell(`B${startRow}`).value = 'TỔNG VA CHẶT+MAY+GÒ';
-    worksheet.getCell(`C${startRow}`).value = '0.0';
-    worksheet.getCell(`F${startRow}`).value = '0.0';
+    worksheet.getCell(`C${startRow}`).value = totalAllVA;
+    worksheet.getCell(`F${startRow}`).value = totalAllCT;
     worksheet.getCell(`G${startRow}`).value = 'Total';
-    worksheet.getCell(`I${startRow}`).value = '0.0';
+    worksheet.getCell(`I${startRow}`).value = totalAllLineBalance;
     worksheet.getCell(`J${startRow}`).value = '0.0';
-    worksheet.getCell(`L${startRow}`).value = '0';
+    worksheet.getCell(`L${startRow}`).value = totalAllActualLabor;
     ['B', 'C', 'F', 'G', 'I', 'J', 'L'].forEach((col) => {
       worksheet.getCell(`${col}${startRow}`).style = {
         alignment: {
@@ -1649,7 +1561,7 @@ export class ExcelService {
     });
     startRow++;
 
-    worksheet.getCell(`F${startRow}`).value = '0.0';
+    worksheet.getCell(`F${startRow}`).value = 27000 / totalAllCT;
     worksheet.getCell(`G${startRow}`).value = 'Pair';
     ['F', 'G'].forEach((col) => {
       worksheet.getCell(`${col}${startRow}`).style = {
@@ -1680,15 +1592,61 @@ export class ExcelService {
         font: { name: 'Times New Roman', bold: true, size: 12 },
       };
     });
-    // const total = lsaData.reduce((prev, curr) => prev + curr.CT, 0);
-    // worksheet.getCell(`D${startRow}`).value = 'TOTAL:';
-    // worksheet.getCell(`E${startRow}`).value = total;
-    // startRow++;
 
-    // worksheet.getCell(`D${startRow}`).value = 'PP:';
-    // worksheet.getCell(`E${startRow}`).value =
-    //   total === 0 ? 0 : Number((27000 / total).toFixed(1));
-    // startRow++;
+    worksheet.getCell('O1').value = 'Unit \n單位';
+    worksheet.getCell('P1').value = 'Time (second) 時間';
+    worksheet.getCell('Q1').value = 'Pair/Person/8h 雙數/人/8h';
+    worksheet.getCell('R1').value = 'Manpower Standard labor';
+    worksheet.getCell('S1').value = 'Manpower Actual labor';
+    worksheet.getCell('T1').value = 'LLER% C2B';
+    ['O', 'P', 'Q', 'R', 'S', 'T'].forEach((item) => {
+      worksheet.getColumn(item).width = 12;
+      worksheet.getCell(`${item}1`).style = {
+        alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
+        font: { name: 'Times New Roman', bold: true, size: 11 },
+        fill: {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'ffd966' },
+        },
+        border: {
+          top: { style: 'thin' },
+          right: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+        },
+      };
+    });
+
+    worksheet.getCell('O2').value = '(Cutting)裁斷 - Chặt';
+    worksheet.getCell('O3').value = '(Stitching)針車 - May';
+    worksheet.getCell('O4').value = '(C+S)裁斷+針車 - Chặt + May';
+    worksheet.getCell('O5').value = '(F+A)成型+包裝 - Gò+ Bao bì';
+    worksheet.getCell('O6').value =
+      '(F+A)成型+包裝 - Gò+ Bao bì(F+A)成型+包裝 - Gò+ Bao bì';
+    worksheet.mergeCells('O7:Q7');
+    worksheet.mergeCells('R7:T7');
+    worksheet.getCell('O7').value = 'LC (C2B)';
+
+    for (let row = 2; row <= 7; row++) {
+      for (let col = 15; col <= 20; col++) {
+        worksheet.getRow(row).height = 40;
+        worksheet.getCell(row, col).style = {
+          alignment: {
+            wrapText: true,
+            vertical: 'middle',
+            horizontal: 'center',
+          },
+          font: { name: 'Times New Roman', bold: true, size: 11 },
+          border: {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+        };
+      }
+    }
 
     return await workbook.xlsx.writeBuffer();
   }
