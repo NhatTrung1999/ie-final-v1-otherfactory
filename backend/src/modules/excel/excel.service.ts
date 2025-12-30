@@ -1384,18 +1384,23 @@ export class ExcelService {
 
     lsaData.forEach((items) => {
       let titleArea = '';
+      let machineName = '';
       switch (items.title.trim().toLowerCase()) {
         case 'cutting':
           titleArea = 'VA CHẶT';
+          machineName = 'CHẶT';
           break;
         case 'stitching':
           titleArea = 'TỔNG VA MAY';
+          machineName = 'TÊN MÁY MAY';
           break;
         case 'assembly':
           titleArea = 'TỔNG VA GÒ';
+          machineName = 'TÊN MÁY BÊN GÒ';
           break;
         default:
           titleArea = '';
+          machineName = '';
           break;
       }
       worksheet.mergeCells(`A${startRow}:M${startRow}`);
@@ -1429,9 +1434,38 @@ export class ExcelService {
       );
 
       worksheet.mergeCells(`O${startRow}:P${startRow}`);
-      worksheet.getCell(`O${startRow}`).value = items.title;
+      worksheet.getCell(`O${startRow}`).value = machineName;
       worksheet.getCell(`Q${startRow}`).value = 'SỐ LƯỢNG';
+      ['O', 'P', 'Q'].forEach(
+        (item) => {
+          worksheet.getCell(`${item}${startRow}`).style = {
+            alignment: {
+              wrapText: true,
+              vertical: 'middle',
+              horizontal: 'center',
+            },
+            font: {
+              name: 'Times New Roman',
+              bold: true,
+              size: item === 'A' ? 12 : 11,
+            },
+            fill: {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'ffd966' },
+            },
+            border: {
+              top: { style: 'thin' },
+              right: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+            },
+          };
+        },
+      );
       startRow++;
+
+      console.log(items.rows);
 
       items.rows.forEach((item) => {
         worksheet.getCell(`A${startRow}`).value = item.no;
@@ -1446,6 +1480,7 @@ export class ExcelService {
         worksheet.getCell(`K${startRow}`).value = item.capacity;
         worksheet.getCell(`L${startRow}`).value = item.actualLabor;
         worksheet.getCell(`M${startRow}`).value = item.machineType;
+        worksheet.getCell(`O${startRow}`).value = item.machineType;
 
         [
           'A',
@@ -1461,6 +1496,9 @@ export class ExcelService {
           'K',
           'L',
           'M',
+          'O',
+          'P',
+          'Q',
         ].forEach((col) => {
           worksheet.getCell(`${col}${startRow}`).style = {
             alignment: {
@@ -1478,7 +1516,31 @@ export class ExcelService {
           };
         });
         worksheet.getRow(startRow).height = 24;
+        worksheet.mergeCells(`O${startRow}:P${startRow}`);
         startRow++;
+      });
+
+      worksheet.mergeCells(`O${startRow}:P${startRow}`);
+      worksheet.getCell(`O${startRow}`).value = 'TOTAL';
+      ['O', 'P', 'Q'].forEach((item) => {
+        worksheet.getCell(`${item}${startRow}`).style = {
+          alignment: {
+            wrapText: true,
+            vertical: 'middle',
+            horizontal: 'center',
+          },
+          font: {
+            name: 'Times New Roman',
+            bold: true,
+            size: 11,
+          },
+          border: {
+            top: { style: 'thin' },
+            right: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+          },
+        };
       });
 
       worksheet.getCell(`B${startRow}`).value = titleArea;

@@ -31,7 +31,6 @@ const ModalLSA = ({ setIsOpen, activeColId }: Props) => {
       const { pieces, layers } = data;
       if (!activeColId) return;
       const [id, colId] = activeColId?.split('_').map(String);
-      // console.log((types.NVA * Number(pieces)) / Number(layers));
       dispatch(
         setUpdateValueRow({
           id,
