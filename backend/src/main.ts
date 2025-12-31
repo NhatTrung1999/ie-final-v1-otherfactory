@@ -8,7 +8,13 @@ import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    // preflightContinue: false,
+    // optionsSuccessStatus: 204,
+  });
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
   const uploadPath =

@@ -20,6 +20,7 @@ const initialState: IStageListState = {
     date: '',
     season: '',
     stage: '',
+    cutDie: '',
     area: '',
     article: '',
   },
@@ -51,12 +52,13 @@ export const stagelistUpload = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const { date, season, stage, area, article, files } = payload;
+      const { date, season, stage, cutDie, area, article, files } = payload;
       const formData = new FormData();
 
       formData.append('date', date.trim());
       formData.append('season', season.toUpperCase().trim());
       formData.append('stage', stage.trim());
+      formData.append('cutDie', cutDie.toUpperCase().trim());
       formData.append('area', area.trim());
       formData.append('article', article.toUpperCase().trim());
       if (files) {
@@ -127,6 +129,7 @@ const stagelistSlice = createSlice({
         date: string;
         season: string;
         stage: string;
+        cutDie: string;
         area: string;
         article: string;
       }>

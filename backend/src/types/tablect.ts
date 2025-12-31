@@ -14,6 +14,7 @@ export interface ITablectData {
   CreatedAt: string;
   Season?: string;
   Article?: string;
+  CutDie?: string;
   CreatedFactory?: string;
 }
 

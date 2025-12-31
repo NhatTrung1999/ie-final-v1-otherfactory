@@ -20,6 +20,7 @@ const initialValues: IFormModal = {
   date: new Date().toISOString().slice(0, 10),
   season: '',
   stage: '',
+  cutDie: '',
   area: 'CUTTING',
   article: '',
   files: [],
@@ -29,6 +30,7 @@ const validationSchema = Yup.object({
   date: Yup.string().required('Please do not it blank!'),
   season: Yup.string().required('Please do not it blank!'),
   stage: Yup.string().required('Please do not it blank!'),
+  cutDie: Yup.string().required('Please do not it blank!'),
   area: Yup.string().required('Please do not it blank!'),
   article: Yup.string().required('Please do not it blank!'),
   files: Yup.array()
@@ -55,6 +57,7 @@ const Modal = ({ setIsOpen }: Props) => {
           date: data.date,
           season: data.season,
           stage: data.stage,
+          cutDie: data.cutDie,
           area: data.area,
           article: data.article,
         })
@@ -100,6 +103,7 @@ const Modal = ({ setIsOpen }: Props) => {
         date: formUploadVideo.date || new Date().toISOString().slice(0, 10),
         season: formUploadVideo.season || '',
         stage: formUploadVideo.stage || '',
+        cutDie: formUploadVideo.cutDie || '',
         area: formUploadVideo.area || 'CUTTING',
         article: formUploadVideo.article || '',
       });
@@ -183,6 +187,29 @@ const Modal = ({ setIsOpen }: Props) => {
             {formik.touched.stage && formik.errors.stage ? (
               <div className="text-red-500 text-sm mt-1">
                 {formik.errors.stage}
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <label
+              htmlFor="cutDie"
+              className="block mb-1 text-base font-medium text-gray-700"
+            >
+              Cut Die
+            </label>
+            <input
+              type="text"
+              id="cutDie"
+              name="cutDie"
+              autoComplete="off"
+              value={formik.values.cutDie}
+              onChange={formik.handleChange}
+              className="w-full px-2 py-1.5 uppercase border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none border-gray-300"
+              placeholder="Enter your cutDie..."
+            />
+            {formik.touched.cutDie && formik.errors.cutDie ? (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.cutDie}
               </div>
             ) : null}
           </div>

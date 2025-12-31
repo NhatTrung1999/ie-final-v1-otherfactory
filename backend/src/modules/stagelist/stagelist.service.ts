@@ -28,7 +28,7 @@ export class StagelistService {
     user: any,
   ) {
     try {
-      const { date, season, stage, area, article } = createStagelistDto;
+      const { date, season, stage, cutDie, area, article } = createStagelistDto;
       const { userId, factory } = user;
       let resData: IStageListData[] = [];
 
@@ -81,6 +81,7 @@ export class StagelistService {
           [Date],
           Season,
           Stage,
+          CutDie,
           Area,
           Article,
           Name,
@@ -101,6 +102,7 @@ export class StagelistService {
           ?,
           ?,
           ?,
+          ?,
           GETDATE()
         )`,
           {
@@ -109,6 +111,7 @@ export class StagelistService {
               date,
               season,
               stage,
+              cutDie,
               area,
               article,
               originalName,

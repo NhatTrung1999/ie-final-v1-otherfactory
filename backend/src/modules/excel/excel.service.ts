@@ -1120,6 +1120,51 @@ export class ExcelService {
     EstimateOutput: number = 200,
     TatkTime: number = 18,
   ) {
+    let where = `WHERE 1=1`;
+    const replacements: any[] = [];
+
+    if (DateFrom && DateTo) {
+      where += ` AND sl.[Date] BETWEEN ? AND ?`;
+      replacements.push(DateFrom, DateTo);
+    }
+
+    if (Season) {
+      where += ` AND sl.Season LIKE ?`;
+      replacements.push(`%${Season}%`);
+    }
+
+    if (Stage) {
+      where += ` AND sl.Stage LIKE ?`;
+      replacements.push(`%${Stage}%`);
+    }
+
+    if (Area) {
+      where += ` AND sl.Area LIKE ?`;
+      replacements.push(`%${Area}%`);
+    }
+
+    if (Article) {
+      where += ` AND sl.Article LIKE ?`;
+      replacements.push(`%${Article}%`);
+    }
+
+    if (Account) {
+      where += ` AND tb.CreatedBy LIKE ?`;
+      replacements.push(`%${Account}%`);
+    }
+
+    const records: ITablectData[] = await this.IE.query(
+      `SELECT tb.*, sl.Article, sl.CutDie
+        FROM IE_TableCT AS tb
+        LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
+        ${where}
+        ORDER BY tb.CreatedAt`,
+      {
+        replacements,
+        type: QueryTypes.SELECT,
+      },
+    );
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('LSA Test');
     worksheet.views = [{ state: 'normal', zoomScale: 85 }];
@@ -1155,6 +1200,7 @@ export class ExcelService {
     worksheet.getRow(1).height = 50;
 
     worksheet.getCell('A2').value = 'Model /\nArticle';
+    worksheet.getCell('B2').value = records[0].Article || '';
     worksheet.mergeCells('C2:F2');
     worksheet.mergeCells('G2:M2');
     worksheet.getCell('C2').value = 'Date-測時日期 \nNgày kiểm';
@@ -1165,7 +1211,7 @@ export class ExcelService {
           alignment: {
             wrapText: true,
             vertical: 'middle',
-            horizontal: 'center',
+            horizontal: 'left',
           },
           font: { name: 'Times New Roman', bold: true, size: 11 },
           border: {
@@ -1179,10 +1225,12 @@ export class ExcelService {
     );
 
     worksheet.getCell('A3').value = 'Cut die:\n斬刀';
+    worksheet.getCell('B3').value = records[0].CutDie || '';
     worksheet.mergeCells('C3:F3');
     worksheet.mergeCells('G3:M3');
     worksheet.getCell('C3').value =
       'Estimate output:\n預計產量 \nSản lương dư tinh';
+    worksheet.getCell('G3').value = `${EstimateOutput} Pairs` || '';
 
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
@@ -1190,7 +1238,7 @@ export class ExcelService {
           alignment: {
             wrapText: true,
             vertical: 'middle',
-            horizontal: 'center',
+            horizontal: 'left',
           },
           font: { name: 'Times New Roman', bold: true, size: 11 },
           border: {
@@ -1207,6 +1255,7 @@ export class ExcelService {
     worksheet.mergeCells('C4:F4');
     worksheet.mergeCells('G4:M4');
     worksheet.getCell('C4').value = 'Working time: 工作時間 \nTgian làm việc';
+    worksheet.getCell('G4').value = '8 hours';
 
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
@@ -1214,7 +1263,7 @@ export class ExcelService {
           alignment: {
             wrapText: true,
             vertical: 'middle',
-            horizontal: 'center',
+            horizontal: 'left',
           },
           font: { name: 'Times New Roman', bold: true, size: 11 },
           border: {
@@ -1231,13 +1280,14 @@ export class ExcelService {
     worksheet.mergeCells('C5:F5');
     worksheet.mergeCells('G5:M5');
     worksheet.getCell('C5').value = 'Tatk time';
+    worksheet.getCell('G5').value = `${TatkTime} sec` || '';
     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(
       (item) => {
         worksheet.getCell(`${item}5`).style = {
           alignment: {
             wrapText: true,
             vertical: 'middle',
-            horizontal: 'center',
+            horizontal: 'left',
           },
           font: { name: 'Times New Roman', bold: true, size: 11 },
           border: {
@@ -1309,16 +1359,6 @@ export class ExcelService {
       },
     );
 
-    const records: ITablectData[] = await this.IE.query(
-      `SELECT tb.*
-        FROM IE_TableCT AS tb
-        LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
-        ORDER BY tb.CreatedAt`,
-      {
-        type: QueryTypes.SELECT,
-      },
-    );
-
     const groupedMap = new Map<string, SectionLSA>();
 
     for (const item of records) {
@@ -1339,8 +1379,9 @@ export class ExcelService {
       const actualLabor =
         Math.abs(allocatedLabor - Math.trunc(allocatedLabor)) >= 0.25
           ? Math.ceil(allocatedLabor)
-          : Math.round(allocatedLabor);
-      const lineBalance = Number((totalCT / actualLabor).toFixed(1));
+          : Math.round(allocatedLabor) || 0;
+      const lineBalance =
+        actualLabor > 0 ? Number((totalCT / actualLabor).toFixed(1)) : 0;
 
       if (!groupedMap.has(Area)) {
         groupedMap.set(Area, {
@@ -1436,36 +1477,32 @@ export class ExcelService {
       worksheet.mergeCells(`O${startRow}:P${startRow}`);
       worksheet.getCell(`O${startRow}`).value = machineName;
       worksheet.getCell(`Q${startRow}`).value = 'SỐ LƯỢNG';
-      ['O', 'P', 'Q'].forEach(
-        (item) => {
-          worksheet.getCell(`${item}${startRow}`).style = {
-            alignment: {
-              wrapText: true,
-              vertical: 'middle',
-              horizontal: 'center',
-            },
-            font: {
-              name: 'Times New Roman',
-              bold: true,
-              size: item === 'A' ? 12 : 11,
-            },
-            fill: {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'ffd966' },
-            },
-            border: {
-              top: { style: 'thin' },
-              right: { style: 'thin' },
-              bottom: { style: 'thin' },
-              left: { style: 'thin' },
-            },
-          };
-        },
-      );
+      ['O', 'P', 'Q'].forEach((item) => {
+        worksheet.getCell(`${item}${startRow}`).style = {
+          alignment: {
+            wrapText: true,
+            vertical: 'middle',
+            horizontal: 'center',
+          },
+          font: {
+            name: 'Times New Roman',
+            bold: true,
+            size: item === 'A' ? 12 : 11,
+          },
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'ffd966' },
+          },
+          border: {
+            top: { style: 'thin' },
+            right: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+          },
+        };
+      });
       startRow++;
-
-      console.log(items.rows);
 
       items.rows.forEach((item) => {
         worksheet.getCell(`A${startRow}`).value = item.no;
@@ -1552,19 +1589,30 @@ export class ExcelService {
         items.title.trim().toLowerCase() !== 'cutting' ? 0.0 : '';
       worksheet.getCell(`L${startRow}`).value = items.TotalActualLabor;
       ['B', 'C', 'F', 'G', 'I', 'J', 'L'].forEach((col) => {
-        worksheet.getCell(`${col}${startRow}`).style = {
-          alignment: {
-            wrapText: true,
-            vertical: 'middle',
-            horizontal: 'center',
-          },
-          font: {
-            name: 'Times New Roman',
-            bold: true,
-            size: 12,
-            color: { argb: 'ff0000' },
-          },
+        const cell = worksheet.getCell(`${col}${startRow}`);
+        cell.alignment = {
+          wrapText: true,
+          vertical: 'middle',
+          horizontal: 'center',
         };
+        cell.font = {
+          name: 'Times New Roman',
+          bold: true,
+          size: 11,
+          color: { argb: 'ff0000' },
+        };
+        const shouldFill =
+          col === 'C' ||
+          col === 'I' ||
+          (col === 'J' && items.title.trim().toLowerCase() !== 'cutting') ||
+          col === 'L';
+        if (shouldFill) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'ffe699' },
+          };
+        }
       });
       startRow++;
 
@@ -1580,7 +1628,7 @@ export class ExcelService {
           font: {
             name: 'Times New Roman',
             bold: true,
-            size: 12,
+            size: 11,
             color: { argb: 'ff0000' },
           },
         };
@@ -1607,23 +1655,36 @@ export class ExcelService {
     worksheet.getCell(`J${startRow}`).value = '0.0';
     worksheet.getCell(`L${startRow}`).value = totalAllActualLabor;
     ['B', 'C', 'F', 'G', 'I', 'J', 'L'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        alignment: {
-          wrapText: true,
-          vertical: 'middle',
-          horizontal: 'center',
-        },
-        font: {
-          name: 'Times New Roman',
-          bold: true,
-          size: 12,
-          color: { argb: 'ff0000' },
-        },
+      const cell = worksheet.getCell(`${col}${startRow}`);
+      cell.alignment = {
+        wrapText: true,
+        vertical: 'middle',
+        horizontal: 'center',
       };
+      cell.font = {
+        name: 'Times New Roman',
+        bold: true,
+        size: 11,
+        color: { argb: 'ff0000' },
+      };
+      const shouldFill =
+        col === 'C' || col === 'I' || col === 'J' || col === 'L';
+      if (shouldFill) {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'ffe699' },
+        };
+      }
     });
     startRow++;
 
-    worksheet.getCell(`F${startRow}`).value = 27000 / totalAllCT;
+    const totalPair =
+      totalAllCT === 0 ? 0 : Number((27000 / totalAllCT).toFixed(2));
+
+    worksheet.getCell(`B5`).value = +Number(totalPair / 7.5).toFixed(2);
+
+    worksheet.getCell(`F${startRow}`).value = totalPair;
     worksheet.getCell(`G${startRow}`).value = 'Pair';
     ['F', 'G'].forEach((col) => {
       worksheet.getCell(`${col}${startRow}`).style = {
@@ -1635,7 +1696,7 @@ export class ExcelService {
         font: {
           name: 'Times New Roman',
           bold: true,
-          size: 12,
+          size: 11,
           color: { argb: 'ff0000' },
         },
       };
@@ -1680,12 +1741,99 @@ export class ExcelService {
       };
     });
 
-    worksheet.getCell('O2').value = '(Cutting)裁斷 - Chặt';
-    worksheet.getCell('O3').value = '(Stitching)針車 - May';
-    worksheet.getCell('O4').value = '(C+S)裁斷+針車 - Chặt + May';
-    worksheet.getCell('O5').value = '(F+A)成型+包裝 - Gò+ Bao bì';
-    worksheet.getCell('O6').value =
-      '(F+A)成型+包裝 - Gò+ Bao bì(F+A)成型+包裝 - Gò+ Bao bì';
+    const getItem = (lsaData, title) =>
+      lsaData.find((item) => item.title?.trim().toLowerCase() === title) || {
+        CT: 0,
+        PP: 0,
+        TotalLineBalance: 0,
+        TotalActualLabor: 0,
+      };
+
+    const setCell = (worksheet, cell, value) => {
+      worksheet.getCell(cell).value = value;
+    };
+
+    const setPercentCell = (worksheet, cell, value) => {
+      worksheet.getCell(cell).value = `${(Number(value) * 100).toFixed(0)}%`;
+    };
+    const round2 = (value) =>
+      Number.isFinite(value) ? Math.round(value * 100) / 100 : 0;
+
+    const cutting = getItem(lsaData, 'cutting');
+    const stitching = getItem(lsaData, 'stitching');
+    const assembly = getItem(lsaData, 'assembly');
+
+    setCell(worksheet, 'O2', '(Cutting)裁斷 - Chặt');
+    setCell(worksheet, 'P2', cutting.CT);
+    setCell(worksheet, 'Q2', cutting.PP);
+    setCell(worksheet, 'R2', cutting.TotalLineBalance);
+    setCell(worksheet, 'S2', cutting.TotalActualLabor);
+    setPercentCell(
+      worksheet,
+      'T2',
+      round2(
+        cutting.TotalActualLabor
+          ? cutting.TotalLineBalance / cutting.TotalActualLabor
+          : 0,
+      ),
+    );
+
+    setCell(worksheet, 'O3', '(Stitching)針車 - May');
+    setCell(worksheet, 'P3', stitching.CT);
+    setCell(worksheet, 'Q3', stitching.PP);
+    setCell(worksheet, 'R3', stitching.TotalLineBalance);
+    setCell(worksheet, 'S3', stitching.TotalActualLabor);
+    setPercentCell(
+      worksheet,
+      'T3',
+      round2(
+        stitching.TotalActualLabor
+          ? stitching.TotalLineBalance / stitching.TotalActualLabor
+          : 0,
+      ),
+    );
+
+    const csCT = cutting.CT + stitching.CT;
+    const csLB = cutting.TotalLineBalance + stitching.TotalLineBalance;
+    const csLabor = cutting.TotalActualLabor + stitching.TotalActualLabor;
+
+    setCell(worksheet, 'O4', '(C+S)裁斷+針車 - Chặt + May');
+    setCell(worksheet, 'P4', csCT);
+    setCell(worksheet, 'Q4', round2(csCT ? 27000 / csCT : 0));
+    setCell(worksheet, 'R4', csLB);
+    setCell(worksheet, 'S4', csLabor);
+    setPercentCell(worksheet, 'T4', round2(csLabor ? csLB / csLabor : 0));
+
+    setCell(worksheet, 'O5', '(F+A)成型+包裝 - Gò+ Bao bì');
+    setCell(worksheet, 'P5', assembly.CT);
+    setCell(worksheet, 'Q5', assembly.PP);
+    setCell(worksheet, 'R5', assembly.TotalLineBalance);
+    setCell(worksheet, 'S5', assembly.TotalActualLabor);
+    setPercentCell(
+      worksheet,
+      'T5',
+      round2(
+        assembly.TotalActualLabor
+          ? assembly.TotalLineBalance / assembly.TotalActualLabor
+          : 0,
+      ),
+    );
+
+    const totalCT = csCT + assembly.CT;
+    const totalLB = csLB + assembly.TotalLineBalance;
+    const totalLabor = csLabor + assembly.TotalActualLabor;
+
+    setCell(worksheet, 'O6', '(C2B)裁斷+針車+成型+包裝 - C+M+G+BB');
+    setCell(worksheet, 'P6', totalCT);
+    setCell(worksheet, 'Q6', round2(totalCT ? 27000 / totalCT : 0));
+    setCell(worksheet, 'R6', totalLB);
+    setCell(worksheet, 'S6', totalLabor);
+    setPercentCell(
+      worksheet,
+      'T6',
+      round2(totalLabor ? totalLB / totalLabor : 0),
+    );
+
     worksheet.mergeCells('O7:Q7');
     worksheet.mergeCells('R7:T7');
     worksheet.getCell('O7').value = 'LC (C2B)';
