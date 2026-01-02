@@ -38,7 +38,6 @@ const controlpanelSlice = createSlice({
       action: PayloadAction<{ type: string; valueTime: number }>
     ) => {
       const { type, valueTime } = action.payload;
-      console.log(type, valueTime);
       state.types[type] += valueTime;
     },
     setDiffTypes: (

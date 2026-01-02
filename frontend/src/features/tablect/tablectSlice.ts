@@ -336,13 +336,28 @@ const tablectSlice = createSlice({
         (
           state,
           action: PayloadAction<
-            { MachineTypeCN: string; MachineTypeVN: string; Loss: string }[]
+            {
+              MachineTypeEn: string;
+              MachineTypeCN: string;
+              MachineTypeVN: string;
+              Loss: string;
+            }[]
           >
         ) => {
           state.loading = false;
+          const auth = JSON.parse(localStorage.getItem('auth') as string);
+          const factory = auth?.Factory;
           state.machineTypes = action.payload.map((item) => ({
-            value: `${item.MachineTypeCN} - ${item.MachineTypeVN}_${item.Loss}`,
-            label: `${item.MachineTypeCN} - ${item.MachineTypeVN}`,
+            value: `${
+              factory.trim().toLowerCase() !== 'LYM'.trim().toLowerCase()
+                ? `${item.MachineTypeCN} - ${item.MachineTypeVN}_${item.Loss}`
+                : `${item.MachineTypeEn}_${item.Loss}`
+            }`,
+            label: `${
+              factory.trim().toLowerCase() !== 'LYM'.trim().toLowerCase()
+                ? `${item.MachineTypeCN} - ${item.MachineTypeVN}`
+                : `${item.MachineTypeEn}`
+            }`,
           }));
           // console.log(action.payload);
         }

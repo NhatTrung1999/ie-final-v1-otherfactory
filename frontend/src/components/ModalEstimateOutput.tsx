@@ -1,7 +1,9 @@
 import { IoClose } from 'react-icons/io5';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { useAppSelector } from '../app/hooks';
+import excelApi from '../api/excelApi';
+import { useEffect, useMemo } from 'react';
 
 type Props = {
   setIsOpen: (isOpen: boolean) => void;
@@ -9,15 +11,15 @@ type Props = {
 };
 
 const WORKING_TIME = 27000;
-const TOTAL_CT = 26.8;
-// const EFFICIENCY = 100;
 
 type EstimateFormValues = {
-  estimateOutput: number | '';
+  estimateOutput: number;
+  taktTime: number;
 };
 
 const initialValues: EstimateFormValues = {
-  estimateOutput: '',
+  estimateOutput: 0,
+  taktTime: 0,
 };
 
 const validationSchema = Yup.object({
@@ -29,28 +31,60 @@ const validationSchema = Yup.object({
 
 const ModalEstimateOutput = ({ setIsOpen }: Props) => {
   const { tablect } = useAppSelector((state) => state.tablect);
-  // const dispatch = useAppDispatch();
+  const { filter } = useAppSelector((state) => state.stagelist);
+  const { auth } = useAppSelector((state) => state.auth);
+
+  const totalCT = useMemo(() => {
+    let total = 0;
+    for (const item of tablect) {
+      const nva = Number(item.Nva.Average) || 0;
+      const va = Number(item.Va.Average) || 0;
+      const loss = parseFloat(item.Loss || '0') / 100 || 0;
+      total += (nva + va) * (1 + loss);
+    }
+    return Number(total.toFixed(2));
+  }, [tablect]);
 
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (data) => {
-      // console.log(data);
+      console.log(data);
       // console.log(tablect.reduce((prev, curr) => Number(curr.Nva.Average) + Number(curr.Va.Average) +prev), 0);
+      try {
+        const res = await excelApi.exportLSA({
+          ...filter,
+          Account: auth?.UserID,
+          EstimateOutput: data.estimateOutput,
+          TatkTime: data.taktTime,
+        });
+        const url = URL.createObjectURL(new Blob([res]));
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Excel LSA.xlsx');
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.log(error);
+      }
+      setIsOpen(false);
     },
   });
 
-  const totalCT = tablect.reduce(
-    (sum, item) => sum + item.Va.Average + item.Nva.Average,
-    0
-  );
+  useEffect(() => {
+    const output = Number(formik.values.estimateOutput);
+    const takt = output > 0 ? Math.round(3600 / output) : 0;
+    formik.setFieldValue('taktTime', takt, false);
+  }, [formik.values.estimateOutput]);
 
-  const tatkTime =
-    Number(formik.values.estimateOutput) > 0
-      ? (3600 / Number(formik.values.estimateOutput)).toFixed(0)
+  const manpower =
+    formik.values.taktTime > 0
+      ? Math.ceil(totalCT / formik.values.taktTime)
       : 0;
-
-  const manpower = Number(tatkTime) > 0 ? Math.ceil(totalCT / +tatkTime) : 0;
 
   const capacity = totalCT > 0 ? 3600 / totalCT : 0;
 
@@ -93,14 +127,14 @@ const ModalEstimateOutput = ({ setIsOpen }: Props) => {
               Working Time: <b>{WORKING_TIME.toLocaleString()} sec</b>
             </div>
             <div>
-              Tatk Time: <b>{tatkTime} sec</b>
+              Tatk Time: <b>{formik.values.taktTime} sec</b>
             </div>
           </div>
           <hr className="border-gray-200" />
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Total CT</span>
-              <span>{totalCT} sec</span>
+              <span>{totalCT.toFixed(2)} sec</span>
             </div>
             <hr className="border-dashed border-gray-200" />
 

@@ -136,31 +136,31 @@ const TableCT = () => {
   };
 
   const handleExcelLSA = async () => {
-    setIsOpen(true);
-    // const isConfirm = tablect.every((item) => item.ConfirmId !== null);
+    const isConfirm = tablect.every((item) => item.ConfirmId !== null);
+    
+    if (isConfirm) {
+      setIsOpen(true);
+      // try {
+      //   const res = await excelApi.exportLSA({
+      //     ...filter,
+      //     Account: auth?.UserID,
+      //   });
+      //   const url = URL.createObjectURL(new Blob([res]));
 
-    // if (isConfirm) {
-    //   try {
-    //     const res = await excelApi.exportLSA({
-    //       ...filter,
-    //       Account: auth?.UserID,
-    //     });
-    //     const url = URL.createObjectURL(new Blob([res]));
+      //   const link = document.createElement('a');
+      //   link.href = url;
+      //   link.setAttribute('download', 'Excel LSA.xlsx');
+      //   document.body.appendChild(link);
+      //   link.click();
 
-    //     const link = document.createElement('a');
-    //     link.href = url;
-    //     link.setAttribute('download', 'Excel LSA.xlsx');
-    //     document.body.appendChild(link);
-    //     link.click();
-
-    //     document.body.removeChild(link);
-    //     window.URL.revokeObjectURL(url);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // } else {
-    //   toast.warn('Please confirm your userId before export excel!');
-    // }
+      //   document.body.removeChild(link);
+      //   window.URL.revokeObjectURL(url);
+      // } catch (error) {
+      //   console.log(error);
+      // }
+    } else {
+      toast.warn('Please confirm your userId before export excel!');
+    }
   };
 
   const handleExcelTimeStudy = async () => {

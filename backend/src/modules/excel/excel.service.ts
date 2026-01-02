@@ -10,7 +10,7 @@ import {
   defaultFill,
   defaultFont,
 } from './constants';
-import { CTData, Section, SectionLSA, TimeStudyData } from './types';
+import { CTData, RowLSA, Section, SectionLSA, TimeStudyData } from './types';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
 import { ITablectData, ITablectType } from 'src/types/tablect';
@@ -20,500 +20,500 @@ export class ExcelService {
   constructor(@Inject('IE') private readonly IE: Sequelize) {}
 
   //LSA
-  private applyCellConfigurations(worksheet: ExcelJS.Worksheet): void {
-    const borderStyle = { style: 'thin' as ExcelJS.BorderStyle };
+  // private applyCellConfigurations(worksheet: ExcelJS.Worksheet): void {
+  //   const borderStyle = { style: 'thin' as ExcelJS.BorderStyle };
 
-    cellConfigurations.forEach(({ cell, value, merge }) => {
-      // Gộp ô nếu có merge
-      if (merge) {
-        worksheet.mergeCells(merge);
+  //   cellConfigurations.forEach(({ cell, value, merge }) => {
+  //     // Gộp ô nếu có merge
+  //     if (merge) {
+  //       worksheet.mergeCells(merge);
 
-        // Xác định vùng gộp để áp dụng border
-        const [startCell, endCell] = merge.split(':');
-        const start = worksheet.getCell(startCell);
-        const end = worksheet.getCell(endCell);
-        const startRow = Number(start.row); // Ensure numeric type
-        const endRow = Number(end.row); // Ensure numeric type
-        const startCol = Number(start.col); // Ép kiểu
-        const endCol = Number(end.col); // Ép kiểu
+  //       // Xác định vùng gộp để áp dụng border
+  //       const [startCell, endCell] = merge.split(':');
+  //       const start = worksheet.getCell(startCell);
+  //       const end = worksheet.getCell(endCell);
+  //       const startRow = Number(start.row); // Ensure numeric type
+  //       const endRow = Number(end.row); // Ensure numeric type
+  //       const startCol = Number(start.col); // Ép kiểu
+  //       const endCol = Number(end.col); // Ép kiểu
 
-        // Áp dụng border cho tất cả ô trong vùng gộp
-        for (let row = startRow; row <= endRow; row++) {
-          for (let col = startCol; col <= endCol; col++) {
-            worksheet.getCell(row, col).border = {
-              top: borderStyle,
-              right: borderStyle,
-              bottom: borderStyle,
-              left: borderStyle,
-            };
-            if (row === 5 || row === 6) {
-              worksheet.getCell(row, col).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'ccffff' },
-              };
-            }
-          }
-        }
-      }
+  //       // Áp dụng border cho tất cả ô trong vùng gộp
+  //       for (let row = startRow; row <= endRow; row++) {
+  //         for (let col = startCol; col <= endCol; col++) {
+  //           worksheet.getCell(row, col).border = {
+  //             top: borderStyle,
+  //             right: borderStyle,
+  //             bottom: borderStyle,
+  //             left: borderStyle,
+  //           };
+  //           if (row === 5 || row === 6) {
+  //             worksheet.getCell(row, col).fill = {
+  //               type: 'pattern',
+  //               pattern: 'solid',
+  //               fgColor: { argb: 'ccffff' },
+  //             };
+  //           }
+  //         }
+  //       }
+  //     }
 
-      // Ghi giá trị và định dạng cho ô
-      if (cell) {
-        const targetCell = worksheet.getCell(cell);
-        targetCell.value = value;
-        targetCell.alignment = {
-          wrapText: true,
-          vertical: 'middle',
-          horizontal: 'center',
-        };
-        targetCell.font = {
-          name: 'Arial',
-          family: 2,
-          size: 10,
-          bold: true,
-        };
+  //     // Ghi giá trị và định dạng cho ô
+  //     if (cell) {
+  //       const targetCell = worksheet.getCell(cell);
+  //       targetCell.value = value;
+  //       targetCell.alignment = {
+  //         wrapText: true,
+  //         vertical: 'middle',
+  //         horizontal: 'center',
+  //       };
+  //       targetCell.font = {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 10,
+  //         bold: true,
+  //       };
 
-        // Áp dụng border cho ô đơn lẻ (nếu không thuộc vùng gộp)
-        if (!merge) {
-          targetCell.border = {
-            top: borderStyle,
-            right: borderStyle,
-            bottom: borderStyle,
-            left: borderStyle,
-          };
-          if (cell.includes('5') || cell.includes('6')) {
-            worksheet.getCell(cell).fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'ccffff' },
-            };
-          }
-        }
-      }
-    });
-  }
+  //       // Áp dụng border cho ô đơn lẻ (nếu không thuộc vùng gộp)
+  //       if (!merge) {
+  //         targetCell.border = {
+  //           top: borderStyle,
+  //           right: borderStyle,
+  //           bottom: borderStyle,
+  //           left: borderStyle,
+  //         };
+  //         if (cell.includes('5') || cell.includes('6')) {
+  //           worksheet.getCell(cell).fill = {
+  //             type: 'pattern',
+  //             pattern: 'solid',
+  //             fgColor: { argb: 'ccffff' },
+  //           };
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
-  async exportLSA(
-    DateFrom: string,
-    DateTo: string,
-    Season: string,
-    Stage: string,
-    Area: string,
-    Article: string,
-    Account: string,
-  ) {
-    let where = `WHERE 1=1`;
-    const replacements: any[] = [];
+  // async exportLSA(
+  //   DateFrom: string,
+  //   DateTo: string,
+  //   Season: string,
+  //   Stage: string,
+  //   Area: string,
+  //   Article: string,
+  //   Account: string,
+  // ) {
+  //   let where = `WHERE 1=1`;
+  //   const replacements: any[] = [];
 
-    if (DateFrom && DateTo) {
-      where += ` AND sl.[Date] BETWEEN ? AND ?`;
-      replacements.push(DateFrom, DateTo);
-    }
+  //   if (DateFrom && DateTo) {
+  //     where += ` AND sl.[Date] BETWEEN ? AND ?`;
+  //     replacements.push(DateFrom, DateTo);
+  //   }
 
-    if (Season) {
-      where += ` AND sl.Season LIKE ?`;
-      replacements.push(`%${Season}%`);
-    }
+  //   if (Season) {
+  //     where += ` AND sl.Season LIKE ?`;
+  //     replacements.push(`%${Season}%`);
+  //   }
 
-    if (Stage) {
-      where += ` AND sl.Stage LIKE ?`;
-      replacements.push(`%${Stage}%`);
-    }
+  //   if (Stage) {
+  //     where += ` AND sl.Stage LIKE ?`;
+  //     replacements.push(`%${Stage}%`);
+  //   }
 
-    if (Area) {
-      where += ` AND sl.Area LIKE ?`;
-      replacements.push(`%${Area}%`);
-    }
+  //   if (Area) {
+  //     where += ` AND sl.Area LIKE ?`;
+  //     replacements.push(`%${Area}%`);
+  //   }
 
-    if (Article) {
-      where += ` AND sl.Article LIKE ?`;
-      replacements.push(`%${Article}%`);
-    }
+  //   if (Article) {
+  //     where += ` AND sl.Article LIKE ?`;
+  //     replacements.push(`%${Article}%`);
+  //   }
 
-    if (Account) {
-      where += ` AND tb.CreatedBy LIKE ?`;
-      replacements.push(`%${Account}%`);
-    }
+  //   if (Account) {
+  //     where += ` AND tb.CreatedBy LIKE ?`;
+  //     replacements.push(`%${Account}%`);
+  //   }
 
-    const records: ITablectData[] = await this.IE.query(
-      `SELECT tb.*
-        FROM IE_TableCT AS tb
-        LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
-        ${where}
-        ORDER BY tb.CreatedAt`,
-      {
-        replacements,
-        type: QueryTypes.SELECT,
-      },
-    );
+  //   const records: ITablectData[] = await this.IE.query(
+  //     `SELECT tb.*
+  //       FROM IE_TableCT AS tb
+  //       LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
+  //       ${where}
+  //       ORDER BY tb.CreatedAt`,
+  //     {
+  //       replacements,
+  //       type: QueryTypes.SELECT,
+  //     },
+  //   );
 
-    const groupedMap = new Map<string, Section>();
+  //   const groupedMap = new Map<string, Section>();
 
-    for (const item of records) {
-      const { No, ProgressStagePartName, Area, Nva, Va, Loss, MachineType } =
-        item;
+  //   for (const item of records) {
+  //     const { No, ProgressStagePartName, Area, Nva, Va, Loss, MachineType } =
+  //       item;
 
-      const vaData = JSON.parse(Va) as ITablectType;
-      const nvaData = JSON.parse(Nva) as ITablectType;
+  //     const vaData = JSON.parse(Va) as ITablectType;
+  //     const nvaData = JSON.parse(Nva) as ITablectType;
 
-      const vaAvgCT = vaData.Average;
-      const nvaAvgCT = nvaData.Average;
-      const totalCT = vaAvgCT + nvaAvgCT;
+  //     const vaAvgCT = vaData.Average;
+  //     const nvaAvgCT = nvaData.Average;
+  //     const totalCT = vaAvgCT + nvaAvgCT;
 
-      if (!groupedMap.has(Area)) {
-        groupedMap.set(Area, {
-          title: Area,
-          rows: [],
-          CT: 0,
-          PP: 0,
-        });
-      }
+  //     if (!groupedMap.has(Area)) {
+  //       groupedMap.set(Area, {
+  //         title: Area,
+  //         rows: [],
+  //         CT: 0,
+  //         PP: 0,
+  //       });
+  //     }
 
-      const section = groupedMap.get(Area)!;
+  //     const section = groupedMap.get(Area)!;
 
-      section.rows.push({
-        no: No,
-        operation: ProgressStagePartName,
-        va: vaAvgCT,
-        nvan: nvaAvgCT,
-        ct: totalCT,
-        loss: Loss,
-        machineType: MachineType,
-      });
+  //     section.rows.push({
+  //       no: No,
+  //       operation: ProgressStagePartName,
+  //       va: vaAvgCT,
+  //       nvan: nvaAvgCT,
+  //       ct: totalCT,
+  //       loss: Loss,
+  //       machineType: MachineType,
+  //     });
 
-      section.CT += totalCT;
-      section.PP =
-        section.CT === 0 ? 0 : Number((27000 / section.CT).toFixed(1));
-    }
+  //     section.CT += totalCT;
+  //     section.PP =
+  //       section.CT === 0 ? 0 : Number((27000 / section.CT).toFixed(1));
+  //   }
 
-    const lsaData: Section[] = Array.from(groupedMap.values());
+  //   const lsaData: Section[] = Array.from(groupedMap.values());
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('LSA');
-    worksheet.properties.defaultRowHeight = 24;
-    worksheet.getColumn('B').width = 67;
-    worksheet.getColumn('E').width = 20;
-    worksheet.getColumn('J').width = 30;
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet('LSA');
+  //   worksheet.properties.defaultRowHeight = 24;
+  //   worksheet.getColumn('B').width = 67;
+  //   worksheet.getColumn('E').width = 20;
+  //   worksheet.getColumn('J').width = 30;
 
-    worksheet.mergeCells('A1:K1');
-    worksheet.getCell('A1').value =
-      'LABOR STANDARD ADVICE (Sample) \nBẢNG ĐỊNH MỨC LAO ĐỘNG -工時定量表';
-    worksheet.getCell('A1').style = {
-      alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
-      font: { name: 'Arial', family: 2, bold: true, size: 14 },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '99ccff' } },
-    };
-    for (let col = 1; col <= 10; col++) {
-      const cell = worksheet.getCell(1, col);
-      cell.border = {
-        top: { style: 'thin' },
-        right: { style: 'thin' },
-        bottom: { style: 'thin' },
-        left: { style: 'thin' },
-      };
-    }
-    worksheet.getRow(1).height = 42;
+  //   worksheet.mergeCells('A1:K1');
+  //   worksheet.getCell('A1').value =
+  //     'LABOR STANDARD ADVICE (Sample) \nBẢNG ĐỊNH MỨC LAO ĐỘNG -工時定量表';
+  //   worksheet.getCell('A1').style = {
+  //     alignment: { wrapText: true, vertical: 'middle', horizontal: 'center' },
+  //     font: { name: 'Arial', family: 2, bold: true, size: 14 },
+  //     fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '99ccff' } },
+  //   };
+  //   for (let col = 1; col <= 10; col++) {
+  //     const cell = worksheet.getCell(1, col);
+  //     cell.border = {
+  //       top: { style: 'thin' },
+  //       right: { style: 'thin' },
+  //       bottom: { style: 'thin' },
+  //       left: { style: 'thin' },
+  //     };
+  //   }
+  //   worksheet.getRow(1).height = 42;
 
-    this.applyCellConfigurations(worksheet);
+  //   this.applyCellConfigurations(worksheet);
 
-    let startRow = 7;
+  //   let startRow = 7;
 
-    lsaData.forEach((items) => {
-      // Gộp ô A và B cho tiêu đề Section
-      worksheet.mergeCells(`A${startRow}:B${startRow}`);
-      worksheet.getCell(`A${startRow}`).value = items.title;
-      worksheet.getCell(`A${startRow}`).style = {
-        font: {
-          name: 'Arial',
-          family: 2,
-          bold: true,
-          size: 10,
-          color: { argb: 'FF0000' },
-        },
-        alignment: { vertical: 'middle' },
-      };
+  //   lsaData.forEach((items) => {
+  //     // Gộp ô A và B cho tiêu đề Section
+  //     worksheet.mergeCells(`A${startRow}:B${startRow}`);
+  //     worksheet.getCell(`A${startRow}`).value = items.title;
+  //     worksheet.getCell(`A${startRow}`).style = {
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         bold: true,
+  //         size: 10,
+  //         color: { argb: 'FF0000' },
+  //       },
+  //       alignment: { vertical: 'middle' },
+  //     };
 
-      worksheet.getRow(startRow).height = 24;
-      startRow++;
+  //     worksheet.getRow(startRow).height = 24;
+  //     startRow++;
 
-      // Ghi từng row trong items.rows
-      items.rows.forEach((item) => {
-        worksheet.getCell(`A${startRow}`).value = item.no;
-        worksheet.getCell(`B${startRow}`).value = item.operation;
-        worksheet.getCell(`C${startRow}`).value = item.va;
-        worksheet.getCell(`D${startRow}`).value = item.nvan;
-        worksheet.getCell(`E${startRow}`).value = item.ct;
-        worksheet.getCell(`F${startRow}`).value = item.loss;
-        worksheet.getCell(`K${startRow}`).value = item.machineType;
+  //     // Ghi từng row trong items.rows
+  //     items.rows.forEach((item) => {
+  //       worksheet.getCell(`A${startRow}`).value = item.no;
+  //       worksheet.getCell(`B${startRow}`).value = item.operation;
+  //       worksheet.getCell(`C${startRow}`).value = item.va;
+  //       worksheet.getCell(`D${startRow}`).value = item.nvan;
+  //       worksheet.getCell(`E${startRow}`).value = item.ct;
+  //       worksheet.getCell(`F${startRow}`).value = item.loss;
+  //       worksheet.getCell(`K${startRow}`).value = item.machineType;
 
-        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].forEach(
-          (col) => {
-            worksheet.getCell(`${col}${startRow}`).style = {
-              ...worksheet.getCell(`${col}${startRow}`).style,
-              border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-              font: { name: 'Arial', family: 2, size: 10, bold: true },
-              alignment: {
-                vertical: 'middle',
-                horizontal: col.includes('B') ? 'left' : 'center',
-              },
-            };
-          },
-        );
-        worksheet.getRow(startRow).height = 24;
-        startRow++;
-      });
+  //       ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].forEach(
+  //         (col) => {
+  //           worksheet.getCell(`${col}${startRow}`).style = {
+  //             ...worksheet.getCell(`${col}${startRow}`).style,
+  //             border: {
+  //               top: { style: 'thin' },
+  //               left: { style: 'thin' },
+  //               bottom: { style: 'thin' },
+  //               right: { style: 'thin' },
+  //             },
+  //             font: { name: 'Arial', family: 2, size: 10, bold: true },
+  //             alignment: {
+  //               vertical: 'middle',
+  //               horizontal: col.includes('B') ? 'left' : 'center',
+  //             },
+  //           };
+  //         },
+  //       );
+  //       worksheet.getRow(startRow).height = 24;
+  //       startRow++;
+  //     });
 
-      const columnK = worksheet.getColumn('K');
-      let maxLength = 0;
-      columnK.eachCell({ includeEmpty: true }, (cell) => {
-        const cellValue = cell.value ? cell.value.toString() : '';
-        maxLength = Math.max(maxLength, cellValue.length);
-      });
-      columnK.width = maxLength;
+  //     const columnK = worksheet.getColumn('K');
+  //     let maxLength = 0;
+  //     columnK.eachCell({ includeEmpty: true }, (cell) => {
+  //       const cellValue = cell.value ? cell.value.toString() : '';
+  //       maxLength = Math.max(maxLength, cellValue.length);
+  //     });
+  //     columnK.width = maxLength;
 
-      // Ghi CT
-      worksheet.getCell(`D${startRow}`).value = 'CT';
-      worksheet.getCell(`E${startRow}`).value = items.CT;
-      ['D', 'E'].forEach((col) => {
-        worksheet.getCell(`${col}${startRow}`).style = {
-          ...worksheet.getCell(`${col}${startRow}`).style,
-          alignment: { vertical: 'middle', horizontal: 'center' },
-          font: {
-            name: 'Arial',
-            family: 2,
-            size: 9,
-            bold: true,
-            color: { argb: 'FF0000' },
-          },
-        };
-        worksheet.getRow(startRow).height = 24;
-      });
-      startRow++;
+  //     // Ghi CT
+  //     worksheet.getCell(`D${startRow}`).value = 'CT';
+  //     worksheet.getCell(`E${startRow}`).value = items.CT;
+  //     ['D', 'E'].forEach((col) => {
+  //       worksheet.getCell(`${col}${startRow}`).style = {
+  //         ...worksheet.getCell(`${col}${startRow}`).style,
+  //         alignment: { vertical: 'middle', horizontal: 'center' },
+  //         font: {
+  //           name: 'Arial',
+  //           family: 2,
+  //           size: 9,
+  //           bold: true,
+  //           color: { argb: 'FF0000' },
+  //         },
+  //       };
+  //       worksheet.getRow(startRow).height = 24;
+  //     });
+  //     startRow++;
 
-      // Ghi PP
-      worksheet.getCell(`D${startRow}`).value = 'PP';
-      worksheet.getCell(`E${startRow}`).value = items.PP;
-      ['D', 'E'].forEach((col) => {
-        worksheet.getCell(`${col}${startRow}`).style = {
-          ...worksheet.getCell(`${col}${startRow}`).style,
-          alignment: { vertical: 'middle', horizontal: 'center' },
-          font: {
-            name: 'Arial',
-            family: 2,
-            size: 9,
-            bold: true,
-            color: { argb: 'FF0000' },
-          },
-        };
-        worksheet.getRow(startRow).height = 24;
-      });
-      startRow++;
-    });
+  //     // Ghi PP
+  //     worksheet.getCell(`D${startRow}`).value = 'PP';
+  //     worksheet.getCell(`E${startRow}`).value = items.PP;
+  //     ['D', 'E'].forEach((col) => {
+  //       worksheet.getCell(`${col}${startRow}`).style = {
+  //         ...worksheet.getCell(`${col}${startRow}`).style,
+  //         alignment: { vertical: 'middle', horizontal: 'center' },
+  //         font: {
+  //           name: 'Arial',
+  //           family: 2,
+  //           size: 9,
+  //           bold: true,
+  //           color: { argb: 'FF0000' },
+  //         },
+  //       };
+  //       worksheet.getRow(startRow).height = 24;
+  //     });
+  //     startRow++;
+  //   });
 
-    const total = lsaData.reduce((prev, curr) => prev + curr.CT, 0);
-    worksheet.getCell(`D${startRow}`).value = 'TOTAL:';
-    worksheet.getCell(`E${startRow}`).value = total;
-    ['D', 'E'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: { vertical: 'middle', horizontal: 'center' },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 9,
-          bold: true,
-          color: { argb: 'FF0000' },
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
-    startRow++;
+  //   const total = lsaData.reduce((prev, curr) => prev + curr.CT, 0);
+  //   worksheet.getCell(`D${startRow}`).value = 'TOTAL:';
+  //   worksheet.getCell(`E${startRow}`).value = total;
+  //   ['D', 'E'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: { vertical: 'middle', horizontal: 'center' },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 9,
+  //         bold: true,
+  //         color: { argb: 'FF0000' },
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
+  //   startRow++;
 
-    worksheet.getCell(`D${startRow}`).value = 'PP:';
-    worksheet.getCell(`E${startRow}`).value =
-      total === 0 ? 0 : Number((27000 / total).toFixed(1));
-    ['D', 'E'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: { vertical: 'middle', horizontal: 'center' },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 9,
-          bold: true,
-          color: { argb: 'FF0000' },
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
-    startRow++;
+  //   worksheet.getCell(`D${startRow}`).value = 'PP:';
+  //   worksheet.getCell(`E${startRow}`).value =
+  //     total === 0 ? 0 : Number((27000 / total).toFixed(1));
+  //   ['D', 'E'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: { vertical: 'middle', horizontal: 'center' },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 9,
+  //         bold: true,
+  //         color: { argb: 'FF0000' },
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
+  //   startRow++;
 
-    worksheet.getCell(`B${startRow}`).value = 'Unit \n單位';
-    worksheet.getCell(`B${startRow}`).style = {
-      border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
-      },
-      alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
-      font: {
-        name: 'Arial',
-        family: 2,
-        size: 10,
-        bold: true,
-      },
-    };
+  //   worksheet.getCell(`B${startRow}`).value = 'Unit \n單位';
+  //   worksheet.getCell(`B${startRow}`).style = {
+  //     border: {
+  //       top: { style: 'thin' },
+  //       left: { style: 'thin' },
+  //       bottom: { style: 'thin' },
+  //       right: { style: 'thin' },
+  //     },
+  //     alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+  //     font: {
+  //       name: 'Arial',
+  //       family: 2,
+  //       size: 10,
+  //       bold: true,
+  //     },
+  //   };
 
-    worksheet.mergeCells(`C${startRow}:D${startRow}`);
-    worksheet.getCell(`C${startRow}`).value = 'Time(second) \n時間';
-    ['C', 'D'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 9,
-          bold: true,
-        },
-        border: {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
+  //   worksheet.mergeCells(`C${startRow}:D${startRow}`);
+  //   worksheet.getCell(`C${startRow}`).value = 'Time(second) \n時間';
+  //   ['C', 'D'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 9,
+  //         bold: true,
+  //       },
+  //       border: {
+  //         top: { style: 'thin' },
+  //         left: { style: 'thin' },
+  //         bottom: { style: 'thin' },
+  //         right: { style: 'thin' },
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
 
-    worksheet.mergeCells(`E${startRow}:F${startRow}`);
-    worksheet.getCell(`E${startRow}`).value = 'Pair/Person/8h \n雙數/人/8h';
-    ['E', 'F'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 9,
-          bold: true,
-        },
-        border: {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
+  //   worksheet.mergeCells(`E${startRow}:F${startRow}`);
+  //   worksheet.getCell(`E${startRow}`).value = 'Pair/Person/8h \n雙數/人/8h';
+  //   ['E', 'F'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 9,
+  //         bold: true,
+  //       },
+  //       border: {
+  //         top: { style: 'thin' },
+  //         left: { style: 'thin' },
+  //         bottom: { style: 'thin' },
+  //         right: { style: 'thin' },
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
 
-    worksheet.mergeCells(`G${startRow}:I${startRow}`);
-    worksheet.getCell(`G${startRow}`).value = 'LLER';
-    ['G', 'H', 'I'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 9,
-          bold: true,
-        },
-        border: {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
+  //   worksheet.mergeCells(`G${startRow}:I${startRow}`);
+  //   worksheet.getCell(`G${startRow}`).value = 'LLER';
+  //   ['G', 'H', 'I'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: { vertical: 'middle', horizontal: 'center', wrapText: true },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 9,
+  //         bold: true,
+  //       },
+  //       border: {
+  //         top: { style: 'thin' },
+  //         left: { style: 'thin' },
+  //         bottom: { style: 'thin' },
+  //         right: { style: 'thin' },
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
 
-    startRow++;
+  //   startRow++;
 
-    const processes = [
-      { name: '(Cutting)裁斷', time: 0.0, pairPerPerson: 0, ller: 0.0 },
-      { name: '(Stitching)針車', time: 0.0, pairPerPerson: 0, ller: 0.0 },
-      { name: '(F+A)成型+包裝', time: 0.0, pairPerPerson: 0, ller: 0.0 },
-      {
-        name: '(C2B)裁斷+針車+成型+包裝',
-        time: 0.0,
-        pairPerPerson: 0,
-        ller: 0.0,
-      },
-    ];
+  //   const processes = [
+  //     { name: '(Cutting)裁斷', time: 0.0, pairPerPerson: 0, ller: 0.0 },
+  //     { name: '(Stitching)針車', time: 0.0, pairPerPerson: 0, ller: 0.0 },
+  //     { name: '(F+A)成型+包裝', time: 0.0, pairPerPerson: 0, ller: 0.0 },
+  //     {
+  //       name: '(C2B)裁斷+針車+成型+包裝',
+  //       time: 0.0,
+  //       pairPerPerson: 0,
+  //       ller: 0.0,
+  //     },
+  //   ];
 
-    processes.forEach((process) => {
-      worksheet.getCell(`B${startRow}`).value = process.name;
-      worksheet.mergeCells(`C${startRow}:D${startRow}`);
-      worksheet.getCell(`C${startRow}`).value = process.time;
-      worksheet.mergeCells(`E${startRow}:F${startRow}`);
-      worksheet.getCell(`E${startRow}`).value = process.pairPerPerson;
-      worksheet.mergeCells(`G${startRow}:I${startRow}`);
-      worksheet.getCell(`G${startRow}`).value = process.ller;
+  //   processes.forEach((process) => {
+  //     worksheet.getCell(`B${startRow}`).value = process.name;
+  //     worksheet.mergeCells(`C${startRow}:D${startRow}`);
+  //     worksheet.getCell(`C${startRow}`).value = process.time;
+  //     worksheet.mergeCells(`E${startRow}:F${startRow}`);
+  //     worksheet.getCell(`E${startRow}`).value = process.pairPerPerson;
+  //     worksheet.mergeCells(`G${startRow}:I${startRow}`);
+  //     worksheet.getCell(`G${startRow}`).value = process.ller;
 
-      // Thêm border cho các ô
-      ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((col) => {
-        worksheet.getCell(`${col}${startRow}`).style = {
-          ...worksheet.getCell(`${col}${startRow}`).style,
-          border: {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
-          },
-          alignment: {
-            vertical: 'middle',
-            horizontal: 'center',
-          },
-          font: {
-            name: 'Arial',
-            family: 2,
-            size: 10,
-            bold: true,
-          },
-          numFmt: col === 'G' ? '0.00%' : '',
-        };
-        worksheet.getRow(startRow).height = 24;
-      });
+  //     // Thêm border cho các ô
+  //     ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((col) => {
+  //       worksheet.getCell(`${col}${startRow}`).style = {
+  //         ...worksheet.getCell(`${col}${startRow}`).style,
+  //         border: {
+  //           top: { style: 'thin' },
+  //           left: { style: 'thin' },
+  //           bottom: { style: 'thin' },
+  //           right: { style: 'thin' },
+  //         },
+  //         alignment: {
+  //           vertical: 'middle',
+  //           horizontal: 'center',
+  //         },
+  //         font: {
+  //           name: 'Arial',
+  //           family: 2,
+  //           size: 10,
+  //           bold: true,
+  //         },
+  //         numFmt: col === 'G' ? '0.00%' : '',
+  //       };
+  //       worksheet.getRow(startRow).height = 24;
+  //     });
 
-      startRow++;
-    });
+  //     startRow++;
+  //   });
 
-    worksheet.getCell(`B${startRow}`).value = 'Chủ quản xưởng vụ 廠務主管';
-    worksheet.mergeCells(`C${startRow}:E${startRow}`);
-    worksheet.getCell(`C${startRow}`).value = 'Chủ quản hiện trường 現場主管';
-    worksheet.mergeCells(`F${startRow}:I${startRow}`);
-    worksheet.getCell(`F${startRow}`).value = 'Chủ quản định mức 企劃主管';
-    worksheet.mergeCells(`J${startRow}:K${startRow}`);
-    worksheet.getCell(`J${startRow}`).value = 'Lập biểu 制表';
-    ['B', 'C', 'E', 'F', 'G', 'I', 'J', 'K'].forEach((col) => {
-      worksheet.getCell(`${col}${startRow}`).style = {
-        ...worksheet.getCell(`${col}${startRow}`).style,
-        alignment: {
-          vertical: 'middle',
-          horizontal: 'center',
-        },
-        font: {
-          name: 'Arial',
-          family: 2,
-          size: 10,
-          bold: true,
-        },
-      };
-      worksheet.getRow(startRow).height = 24;
-    });
-    startRow++;
+  //   worksheet.getCell(`B${startRow}`).value = 'Chủ quản xưởng vụ 廠務主管';
+  //   worksheet.mergeCells(`C${startRow}:E${startRow}`);
+  //   worksheet.getCell(`C${startRow}`).value = 'Chủ quản hiện trường 現場主管';
+  //   worksheet.mergeCells(`F${startRow}:I${startRow}`);
+  //   worksheet.getCell(`F${startRow}`).value = 'Chủ quản định mức 企劃主管';
+  //   worksheet.mergeCells(`J${startRow}:K${startRow}`);
+  //   worksheet.getCell(`J${startRow}`).value = 'Lập biểu 制表';
+  //   ['B', 'C', 'E', 'F', 'G', 'I', 'J', 'K'].forEach((col) => {
+  //     worksheet.getCell(`${col}${startRow}`).style = {
+  //       ...worksheet.getCell(`${col}${startRow}`).style,
+  //       alignment: {
+  //         vertical: 'middle',
+  //         horizontal: 'center',
+  //       },
+  //       font: {
+  //         name: 'Arial',
+  //         family: 2,
+  //         size: 10,
+  //         bold: true,
+  //       },
+  //     };
+  //     worksheet.getRow(startRow).height = 24;
+  //   });
+  //   startRow++;
 
-    return await workbook.xlsx.writeBuffer();
-  }
+  //   return await workbook.xlsx.writeBuffer();
+  // }
 
   //Time Study
   private setMergedCell = (
@@ -1109,7 +1109,7 @@ export class ExcelService {
   }
 
   //Test LSA
-  async exportLSATest(
+  async exportLSA(
     DateFrom: string,
     DateTo: string,
     Season: string,
@@ -1367,11 +1367,12 @@ export class ExcelService {
 
       const vaData = JSON.parse(Va) as ITablectType;
       const nvaData = JSON.parse(Nva) as ITablectType;
+      const lossValue = Loss ? parseFloat(Loss) : 0;
 
       const vaAvgCT = vaData.Average;
       const nvaAvgCT = nvaData.Average;
       const totalCT = Number(
-        ((vaAvgCT + nvaAvgCT) * (1 + parseFloat(Loss) / 100)).toFixed(2),
+        ((vaAvgCT + nvaAvgCT) * (1 + lossValue / 100)).toFixed(2),
       );
       const standardLabor = Number((totalCT / TatkTime).toFixed(1));
       const allocatedLabor = Number(standardLabor.toFixed(1));
@@ -1408,7 +1409,7 @@ export class ExcelService {
         capacity,
         actualLabor,
         lineBalance,
-        loss: Loss,
+        loss: lossValue.toString(),
         machineType: MachineType,
       });
       section.TotalVA += vaAvgCT;
@@ -1422,6 +1423,7 @@ export class ExcelService {
     const lsaData: SectionLSA[] = Array.from(groupedMap.values());
 
     let startRow = 8;
+    let machineRow = startRow;
 
     lsaData.forEach((items) => {
       let titleArea = '';
@@ -1474,11 +1476,11 @@ export class ExcelService {
         },
       );
 
-      worksheet.mergeCells(`O${startRow}:P${startRow}`);
-      worksheet.getCell(`O${startRow}`).value = machineName;
-      worksheet.getCell(`Q${startRow}`).value = 'SỐ LƯỢNG';
+      worksheet.mergeCells(`O${machineRow}:P${machineRow}`);
+      worksheet.getCell(`O${machineRow}`).value = machineName;
+      worksheet.getCell(`Q${machineRow}`).value = 'SỐ LƯỢNG';
       ['O', 'P', 'Q'].forEach((item) => {
-        worksheet.getCell(`${item}${startRow}`).style = {
+        worksheet.getCell(`${item}${machineRow}`).style = {
           alignment: {
             wrapText: true,
             vertical: 'middle',
@@ -1502,48 +1504,35 @@ export class ExcelService {
           },
         };
       });
+
+      const machineSummary: Record<string, number> = {};
+
+      items.rows.forEach((r: RowLSA) => {
+        if (typeof r.machineType === 'string' && r.machineType) {
+          machineSummary[r.machineType] =
+            (machineSummary[r.machineType] || 0) + 1;
+        }
+      });
       startRow++;
+      machineRow++;
 
-      items.rows.forEach((item) => {
-        worksheet.getCell(`A${startRow}`).value = item.no;
-        worksheet.getCell(`B${startRow}`).value = item.operation;
-        worksheet.getCell(`C${startRow}`).value = item.va;
-        worksheet.getCell(`D${startRow}`).value = item.nvan;
-        worksheet.getCell(`E${startRow}`).value = parseFloat(item.loss) / 100;
-        worksheet.getCell(`F${startRow}`).value = item.ct;
-        worksheet.getCell(`G${startRow}`).value = item.standardLabor;
-        worksheet.getCell(`H${startRow}`).value = item.allocatedLabor;
-        worksheet.getCell(`I${startRow}`).value = item.lineBalance;
-        worksheet.getCell(`K${startRow}`).value = item.capacity;
-        worksheet.getCell(`L${startRow}`).value = item.actualLabor;
-        worksheet.getCell(`M${startRow}`).value = item.machineType;
-        worksheet.getCell(`O${startRow}`).value = item.machineType;
+      Object.entries(machineSummary).forEach(([machine, qty]) => {
+        worksheet.mergeCells(`O${machineRow}:P${machineRow}`);
+        worksheet.getCell(`O${machineRow}`).value = machine;
+        worksheet.getCell(`Q${machineRow}`).value = qty;
 
-        [
-          'A',
-          'B',
-          'C',
-          'D',
-          'E',
-          'F',
-          'G',
-          'H',
-          'I',
-          'J',
-          'K',
-          'L',
-          'M',
-          'O',
-          'P',
-          'Q',
-        ].forEach((col) => {
-          worksheet.getCell(`${col}${startRow}`).style = {
+        (['O', 'P', 'Q'] as const).forEach((col) => {
+          worksheet.getCell(`${col}${machineRow}`).style = {
             alignment: {
               wrapText: true,
               vertical: 'middle',
               horizontal: 'center',
             },
-            font: { name: 'Times New Roman', bold: true, size: 11 },
+            font: {
+              name: 'Times New Roman',
+              bold: true,
+              size: 11,
+            },
             border: {
               top: { style: 'thin' },
               right: { style: 'thin' },
@@ -1552,15 +1541,17 @@ export class ExcelService {
             },
           };
         });
-        worksheet.getRow(startRow).height = 24;
-        worksheet.mergeCells(`O${startRow}:P${startRow}`);
-        startRow++;
+
+        machineRow++;
       });
 
-      worksheet.mergeCells(`O${startRow}:P${startRow}`);
-      worksheet.getCell(`O${startRow}`).value = 'TOTAL';
+      worksheet.mergeCells(`O${machineRow}:P${machineRow}`);
+      worksheet.getCell(`O${machineRow}`).value = 'TOTAL';
+      worksheet.getCell(`Q${machineRow}`).value = Object.values(
+        machineSummary,
+      ).reduce((s, v) => s + v, 0);
       ['O', 'P', 'Q'].forEach((item) => {
-        worksheet.getCell(`${item}${startRow}`).style = {
+        worksheet.getCell(`${item}${machineRow}`).style = {
           alignment: {
             wrapText: true,
             vertical: 'middle',
@@ -1579,6 +1570,56 @@ export class ExcelService {
           },
         };
       });
+      machineRow += 3;
+
+      items.rows.forEach((item) => {
+        worksheet.getCell(`A${startRow}`).value = item.no;
+        worksheet.getCell(`B${startRow}`).value = item.operation;
+        worksheet.getCell(`C${startRow}`).value = item.va;
+        worksheet.getCell(`D${startRow}`).value = item.nvan;
+        worksheet.getCell(`E${startRow}`).value = parseFloat(item.loss) / 100;
+        worksheet.getCell(`F${startRow}`).value = item.ct;
+        worksheet.getCell(`G${startRow}`).value = item.standardLabor;
+        worksheet.getCell(`H${startRow}`).value = item.allocatedLabor;
+        worksheet.getCell(`I${startRow}`).value = item.lineBalance;
+        worksheet.getCell(`K${startRow}`).value = item.capacity;
+        worksheet.getCell(`L${startRow}`).value = item.actualLabor;
+        worksheet.getCell(`M${startRow}`).value = item.machineType;
+
+        [
+          'A',
+          'B',
+          'C',
+          'D',
+          'E',
+          'F',
+          'G',
+          'H',
+          'I',
+          'J',
+          'K',
+          'L',
+          'M',
+        ].forEach((col) => {
+          worksheet.getCell(`${col}${startRow}`).style = {
+            alignment: {
+              wrapText: true,
+              vertical: 'middle',
+              horizontal: 'center',
+            },
+            font: { name: 'Times New Roman', bold: true, size: 11 },
+            border: {
+              top: { style: 'thin' },
+              right: { style: 'thin' },
+              bottom: { style: 'thin' },
+              left: { style: 'thin' },
+            },
+          };
+        });
+        worksheet.getRow(startRow).height = 24;
+        startRow++;
+      });
+      // console.log(startRow);
 
       worksheet.getCell(`B${startRow}`).value = titleArea;
       worksheet.getCell(`C${startRow}`).value = items.TotalVA;
@@ -1652,7 +1693,7 @@ export class ExcelService {
     worksheet.getCell(`F${startRow}`).value = totalAllCT;
     worksheet.getCell(`G${startRow}`).value = 'Total';
     worksheet.getCell(`I${startRow}`).value = totalAllLineBalance;
-    worksheet.getCell(`J${startRow}`).value = '0.0';
+    worksheet.getCell(`J${startRow}`).value = 0;
     worksheet.getCell(`L${startRow}`).value = totalAllActualLabor;
     ['B', 'C', 'F', 'G', 'I', 'J', 'L'].forEach((col) => {
       const cell = worksheet.getCell(`${col}${startRow}`);

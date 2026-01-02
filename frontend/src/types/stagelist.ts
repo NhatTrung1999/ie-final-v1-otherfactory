@@ -28,6 +28,8 @@ export interface IFilter {
   Area?: string;
   Article?: string;
   Account?: string;
+  EstimateOutput?: number;
+  TatkTime?: number;
 }
 
 export interface IStageListState {

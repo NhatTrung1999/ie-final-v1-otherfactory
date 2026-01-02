@@ -202,7 +202,7 @@ export class TablectService {
 
   async getDepartmentMachineType() {
     const records = await this.IE.query(
-      `SELECT MachineTypeCN, MachineTypeVN, Loss
+      `SELECT MachineTypeEn, MachineTypeCN, MachineTypeVN, Loss
         FROM IE_Department_MachineType`,
       { type: QueryTypes.SELECT },
     );
