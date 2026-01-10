@@ -36,8 +36,8 @@ export class StagelistService {
         this.configService.get<string>('UPLOAD_DESTINATION') ||
         '\\192.168.0.102\\cie\\IE_VIDEO';
       // const networkPath =
-      //   this.configService.get<string>('UPLOAD_DESTINATION') ||
-      //   '\\192.168.30.9\\cime\\IE_VIDEO';
+      // this.configService.get<string>('UPLOAD_DESTINATION') ||
+      // '\\192.168.30.9\\cime\\IE_VIDEO';
       // const networkPath =
       //   this.configService.get<string>('UPLOAD_DESTINATION') ||
       //   '\\192.168.55.3\\lym\\ME\\IE_VIDEO';

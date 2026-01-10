@@ -1367,13 +1367,14 @@ export class ExcelService {
 
       const vaData = JSON.parse(Va) as ITablectType;
       const nvaData = JSON.parse(Nva) as ITablectType;
+
       const lossValue = Loss ? parseFloat(Loss) : 0;
 
       const vaAvgCT = vaData.Average;
       const nvaAvgCT = nvaData.Average;
-      const totalCT = Number(
-        ((vaAvgCT + nvaAvgCT) * (1 + lossValue / 100)).toFixed(2),
-      );
+      const totalCT = Number((vaAvgCT + nvaAvgCT) * (1 + lossValue / 100));
+
+      console.log(totalCT);
       const standardLabor = Number((totalCT / TatkTime).toFixed(1));
       const allocatedLabor = Number(standardLabor.toFixed(1));
       const capacity = Number((3600 / totalCT).toFixed(0));
@@ -1403,7 +1404,7 @@ export class ExcelService {
         operation: ProgressStagePartName,
         va: vaAvgCT,
         nvan: nvaAvgCT,
-        ct: totalCT,
+        ct: Number(totalCT.toFixed(2)),
         standardLabor,
         allocatedLabor,
         capacity,
@@ -1623,7 +1624,7 @@ export class ExcelService {
 
       worksheet.getCell(`B${startRow}`).value = titleArea;
       worksheet.getCell(`C${startRow}`).value = items.TotalVA;
-      worksheet.getCell(`F${startRow}`).value = items.CT;
+      worksheet.getCell(`F${startRow}`).value = items.CT.toFixed(2);
       worksheet.getCell(`G${startRow}`).value = 'CT';
       worksheet.getCell(`I${startRow}`).value = items.TotalLineBalance;
       worksheet.getCell(`J${startRow}`).value =
@@ -1690,7 +1691,7 @@ export class ExcelService {
 
     worksheet.getCell(`B${startRow}`).value = 'TỔNG VA CHẶT+MAY+GÒ';
     worksheet.getCell(`C${startRow}`).value = totalAllVA;
-    worksheet.getCell(`F${startRow}`).value = totalAllCT;
+    worksheet.getCell(`F${startRow}`).value = totalAllCT.toFixed(2);
     worksheet.getCell(`G${startRow}`).value = 'Total';
     worksheet.getCell(`I${startRow}`).value = totalAllLineBalance;
     worksheet.getCell(`J${startRow}`).value = 0;
@@ -1725,7 +1726,7 @@ export class ExcelService {
 
     worksheet.getCell(`B5`).value = +Number(totalPair / 7.5).toFixed(2);
 
-    worksheet.getCell(`F${startRow}`).value = totalPair;
+    worksheet.getCell(`F${startRow}`).value = totalPair.toFixed(1);
     worksheet.getCell(`G${startRow}`).value = 'Pair';
     ['F', 'G'].forEach((col) => {
       worksheet.getCell(`${col}${startRow}`).style = {
@@ -1805,8 +1806,8 @@ export class ExcelService {
     const assembly = getItem(lsaData, 'assembly');
 
     setCell(worksheet, 'O2', '(Cutting)裁斷 - Chặt');
-    setCell(worksheet, 'P2', cutting.CT);
-    setCell(worksheet, 'Q2', cutting.PP);
+    setCell(worksheet, 'P2', cutting.CT.toFixed(2));
+    setCell(worksheet, 'Q2', cutting.PP.toFixed(1));
     setCell(worksheet, 'R2', cutting.TotalLineBalance);
     setCell(worksheet, 'S2', cutting.TotalActualLabor);
     setPercentCell(
@@ -1820,8 +1821,8 @@ export class ExcelService {
     );
 
     setCell(worksheet, 'O3', '(Stitching)針車 - May');
-    setCell(worksheet, 'P3', stitching.CT);
-    setCell(worksheet, 'Q3', stitching.PP);
+    setCell(worksheet, 'P3', stitching.CT.toFixed(2));
+    setCell(worksheet, 'Q3', stitching.PP.toFixed(1));
     setCell(worksheet, 'R3', stitching.TotalLineBalance);
     setCell(worksheet, 'S3', stitching.TotalActualLabor);
     setPercentCell(
@@ -1839,15 +1840,15 @@ export class ExcelService {
     const csLabor = cutting.TotalActualLabor + stitching.TotalActualLabor;
 
     setCell(worksheet, 'O4', '(C+S)裁斷+針車 - Chặt + May');
-    setCell(worksheet, 'P4', csCT);
-    setCell(worksheet, 'Q4', round2(csCT ? 27000 / csCT : 0));
+    setCell(worksheet, 'P4', csCT.toFixed(2));
+    setCell(worksheet, 'Q4', round2(csCT ? 27000 / csCT : 0).toFixed(1));
     setCell(worksheet, 'R4', csLB);
     setCell(worksheet, 'S4', csLabor);
     setPercentCell(worksheet, 'T4', round2(csLabor ? csLB / csLabor : 0));
 
     setCell(worksheet, 'O5', '(F+A)成型+包裝 - Gò+ Bao bì');
-    setCell(worksheet, 'P5', assembly.CT);
-    setCell(worksheet, 'Q5', assembly.PP);
+    setCell(worksheet, 'P5', assembly.CT.toFixed(2));
+    setCell(worksheet, 'Q5', assembly.PP.toFixed(1));
     setCell(worksheet, 'R5', assembly.TotalLineBalance);
     setCell(worksheet, 'S5', assembly.TotalActualLabor);
     setPercentCell(
@@ -1865,8 +1866,8 @@ export class ExcelService {
     const totalLabor = csLabor + assembly.TotalActualLabor;
 
     setCell(worksheet, 'O6', '(C2B)裁斷+針車+成型+包裝 - C+M+G+BB');
-    setCell(worksheet, 'P6', totalCT);
-    setCell(worksheet, 'Q6', round2(totalCT ? 27000 / totalCT : 0));
+    setCell(worksheet, 'P6', totalCT.toFixed(2));
+    setCell(worksheet, 'Q6', round2(totalCT ? 27000 / totalCT : 0).toFixed(1));
     setCell(worksheet, 'R6', totalLB);
     setCell(worksheet, 'S6', totalLabor);
     setPercentCell(

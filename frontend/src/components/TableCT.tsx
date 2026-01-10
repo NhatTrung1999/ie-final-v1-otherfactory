@@ -137,7 +137,7 @@ const TableCT = () => {
 
   const handleExcelLSA = async () => {
     const isConfirm = tablect.every((item) => item.ConfirmId !== null);
-    
+
     if (isConfirm) {
       setIsOpen(true);
       // try {
@@ -326,48 +326,54 @@ const TableCT = () => {
               >
                 Confirm
               </button>
-              <button
-                className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                  tablect
-                    .filter((item) => item.Area === activeTabId)
-                    .filter((item) => item.CreatedBy === auth?.UserID)
-                    .length === 0
-                    ? 'cursor-not-allowed opacity-70'
-                    : 'cursor-pointer hover:opacity-70'
-                }`}
-                onClick={handleExcelLSA}
-                disabled={
-                  tablect
-                    .filter((item) => item.Area === activeTabId)
-                    .filter((item) => item.CreatedBy === auth?.UserID)
-                    .length === 0
-                    ? true
-                    : false
-                }
-              >
-                Excel LSA
-              </button>
-              <button
-                className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                  tablect
-                    .filter((item) => item.Area === activeTabId)
-                    .filter((item) => item.CreatedBy === auth?.UserID)
-                    .length === 0
-                    ? 'cursor-not-allowed opacity-70'
-                    : 'cursor-pointer hover:opacity-70'
-                }`}
-                onClick={handleExcelTimeStudy}
-                disabled={
-                  tablect
-                    .filter((item) => item.Area === activeTabId)
-                    .filter((item) => item.CreatedBy === auth?.UserID)
-                    .length === 0
-                    ? true
-                    : false
-                }
-              >
-                Excel Time Study
-              </button>
+              {category?.trim().toLowerCase() ===
+                'LSA'.trim().toLowerCase() && (
+                <button
+                  className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
+                    tablect
+                      .filter((item) => item.Area === activeTabId)
+                      .filter((item) => item.CreatedBy === auth?.UserID)
+                      .length === 0
+                      ? 'cursor-not-allowed opacity-70'
+                      : 'cursor-pointer hover:opacity-70'
+                  }`}
+                  onClick={handleExcelLSA}
+                  disabled={
+                    tablect
+                      .filter((item) => item.Area === activeTabId)
+                      .filter((item) => item.CreatedBy === auth?.UserID)
+                      .length === 0
+                      ? true
+                      : false
+                  }
+                >
+                  Excel LSA
+                </button>
+              )}
+              {category?.trim().toLowerCase() !==
+                'LSA'.trim().toLowerCase() && (
+                <button
+                  className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
+                    tablect
+                      .filter((item) => item.Area === activeTabId)
+                      .filter((item) => item.CreatedBy === auth?.UserID)
+                      .length === 0
+                      ? 'cursor-not-allowed opacity-70'
+                      : 'cursor-pointer hover:opacity-70'
+                  }`}
+                  onClick={handleExcelTimeStudy}
+                  disabled={
+                    tablect
+                      .filter((item) => item.Area === activeTabId)
+                      .filter((item) => item.CreatedBy === auth?.UserID)
+                      .length === 0
+                      ? true
+                      : false
+                  }
+                >
+                  Excel Time Study
+                </button>
+              )}
             </div>
           </div>
         </div>
