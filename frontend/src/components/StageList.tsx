@@ -1,10 +1,11 @@
-import { FaPlus, FaTrash } from 'react-icons/fa6';
+import { FaPlus } from 'react-icons/fa6';
 import { FaSyncAlt } from 'react-icons/fa';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TAB_STAGE_LIST, type IStageList } from '../types/stagelist';
 import Modal from './Modal';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
+  reorderStagelist,
   setActiveItemId,
   setActiveTabId,
   setPath,
@@ -20,6 +21,21 @@ import {
   setDuration,
   setIsPlaying,
 } from '../features/controlpanel/controlpanelSlice';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableStageItem } from './SortableStageItem';
 
 const StageList = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -33,22 +49,6 @@ const StageList = () => {
   const { tablect } = useAppSelector((state) => state.tablect);
   const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
-
-  // const filteredStageList = stagelist.filter((item) => {
-  //   if (filter?.DateFrom || filter?.DateTo) return item.Area === activeTabId;
-
-  //   const date = new Date(item.Date);
-  //   const from = new Date(filter?.DateFrom || '');
-  //   const to = new Date(filter?.DateTo || '');
-  //   console.log(from.setHours(0, 0, 0, 0), to.setHours(23, 59, 59, 999));
-  //   return (
-  //     item.Area === activeTabId &&
-  //     date >= new Date(from.setHours(0, 0, 0, 0)) &&
-  //     date <= new Date(to.setHours(23, 59, 59, 999))
-  //   );
-  // });
-
-  // console.log(filteredStageList);
 
   useEffect(() => {
     dispatch(stagelistList({ ...filter }));
@@ -157,21 +157,36 @@ const StageList = () => {
     dispatch(stagelistList({ ...filter }));
   };
 
-  // console.log(
-  //   stagelist.filter((item) => {
-  //     if (!filter?.DateFrom || !filter?.DateTo) return true;
+  const filteredStagelist = useMemo(() => {
+    return stagelist
+      .filter((item) => item.Area === activeTabId)
+      .filter((item) => item.CreatedBy === auth?.UserID);
+  }, [stagelist, activeTabId, auth?.UserID]);
 
-  //     const created = new Date(item.Date);
-  //     const from = new Date(filter.DateFrom);
-  //     const to = new Date(filter.DateTo);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Di chuyển chuột 5px mới tính là kéo -> giúp click chọn item không bị lỗi
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  //     const createdDate = created.setHours(0, 0, 0, 0);
-  //     const fromDate = from.setHours(0, 0, 0, 0);
-  //     const toDate = to.setHours(23, 59, 59, 999);
-  //     console.log(createdDate, fromDate, toDate);
-  //     return createdDate >= fromDate && createdDate <= toDate;
-  //   })
-  // );
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      // Dispatch action cập nhật Redux dùng ID
+      dispatch(
+        reorderStagelist({
+          activeId: active.id as string,
+          overId: over.id as string,
+        })
+      );
+    }
+  };
 
   return (
     <>
@@ -218,7 +233,7 @@ const StageList = () => {
           </div>
         </div>
         <div className=" flex-1 overflow-y-auto flex flex-col gap-2 p-2">
-          {stagelist
+          {/* {stagelist
             .filter((item) => item.Area === activeTabId)
             .filter((item) => item.CreatedBy === auth?.UserID)
             .map((item, i) => (
@@ -238,7 +253,27 @@ const StageList = () => {
                   <FaTrash />
                 </div>
               </div>
-            ))}
+            ))} */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredStagelist.map((item) => item.Id)} // Quan trọng: Truyền mảng ID đã lọc
+              strategy={verticalListSortingStrategy}
+            >
+              {filteredStagelist.map((item) => (
+                <SortableStageItem
+                  key={item.Id}
+                  item={item}
+                  isActive={item.Id === activeItemId}
+                  onClick={handelClick}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
       </div>
       {isOpen && <Modal setIsOpen={setIsOpen} />}

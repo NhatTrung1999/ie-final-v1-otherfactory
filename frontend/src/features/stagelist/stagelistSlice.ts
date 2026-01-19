@@ -139,6 +139,22 @@ const stagelistSlice = createSlice({
     setFilter: (state, action: PayloadAction<IFilter>) => {
       state.filter = { ...action.payload };
     },
+    reorderStagelist: (
+      state,
+      action: PayloadAction<{ activeId: string; overId: string }>
+    ) => {
+      const { activeId, overId } = action.payload;
+
+      const oldIndex = state.stagelist.findIndex(
+        (item) => item.Id === activeId
+      );
+      const newIndex = state.stagelist.findIndex((item) => item.Id === overId);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const [movedItem] = state.stagelist.splice(oldIndex, 1);
+        state.stagelist.splice(newIndex, 0, movedItem);
+      }
+    },
   },
   extraReducers: (builder) => {
     //upload
@@ -200,6 +216,7 @@ export const {
   setActiveItemId,
   setFormUploadVideo,
   setFilter,
+  reorderStagelist,
 } = stagelistSlice.actions;
 
 export default stagelistSlice.reducer;
