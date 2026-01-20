@@ -58,7 +58,10 @@ export class TablectService {
         FROM IE_TableCT AS tb
         LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
         ${where}
-        ORDER BY tb.CreatedAt`,
+        ORDER BY 
+          CASE WHEN tb.OrderIndex IS NULL THEN 1 ELSE 0 END, 
+          tb.OrderIndex ASC, 
+          tb.CreatedAt`,
       { replacements, type: QueryTypes.SELECT },
     );
 
@@ -72,6 +75,28 @@ export class TablectService {
     });
 
     return records;
+  }
+
+  async updateOrder(ids: string[]) {
+    const transaction = await this.IE.transaction();
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        await this.IE.query(
+          `UPDATE IE_TableCT SET OrderIndex = ? WHERE Id = ?`,
+          {
+            replacements: [i, id],
+            type: QueryTypes.UPDATE,
+            transaction: transaction,
+          },
+        );
+      }
+      await transaction.commit();
+      return { message: 'Order updated successfully' };
+    } catch (error) {
+      await transaction.rollback();
+      throw new InternalServerErrorException('Failed to update order');
+    }
   }
 
   async createData(body: CreateTablectDto) {

@@ -13,6 +13,7 @@ import {
 import { StagelistService } from './stagelist.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateStagelistDto } from './dto/create-stagelist.dto';
+import { UpdateOrderDto } from './dto/update-stagelist.dto';
 
 @Controller('stagelist')
 export class StagelistController {
@@ -46,6 +47,11 @@ export class StagelistController {
       Area,
       Article,
     );
+  }
+
+  @Post('update-order')
+  async updateOrder(@Body() body: UpdateOrderDto) {
+    return await this.stagelistService.updateOrder(body.ids);
   }
 
   @Delete('stagelist-delete/:id')

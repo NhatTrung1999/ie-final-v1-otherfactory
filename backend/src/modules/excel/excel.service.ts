@@ -1,4 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -14,6 +18,8 @@ import { CTData, RowLSA, Section, SectionLSA, TimeStudyData } from './types';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
 import { ITablectData, ITablectType } from 'src/types/tablect';
+// import QuickChart from 'quickchart-js';
+const QuickChart = require('quickchart-js');
 
 @Injectable()
 export class ExcelService {
@@ -1158,15 +1164,22 @@ export class ExcelService {
         FROM IE_TableCT AS tb
         LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
         ${where}
-        ORDER BY tb.CreatedAt`,
+        ORDER BY 
+          CASE WHEN tb.OrderIndex IS NULL THEN 1 ELSE 0 END, 
+          tb.OrderIndex ASC,
+          tb.CreatedAt`,
       {
         replacements,
         type: QueryTypes.SELECT,
       },
     );
 
+    if (records.length === 0) {
+      throw new InternalServerErrorException('No data to export');
+    }
+
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('LSA Test');
+    const worksheet = workbook.addWorksheet('LSA');
     worksheet.views = [{ state: 'normal', zoomScale: 85 }];
 
     worksheet.getColumn('B').width = 40;
@@ -1374,7 +1387,6 @@ export class ExcelService {
       const nvaAvgCT = nvaData.Average;
       const totalCT = Number((vaAvgCT + nvaAvgCT) * (1 + lossValue / 100));
 
-      console.log(totalCT);
       const standardLabor = Number((totalCT / TatkTime).toFixed(1));
       const allocatedLabor = Number(standardLabor.toFixed(1));
       const capacity = Number((3600 / totalCT).toFixed(0));
@@ -1899,6 +1911,82 @@ export class ExcelService {
         };
       }
     }
+
+    const chartLabels = ['Cutting (Chặt)', 'Stitching (May)', 'Assembly (Gò)'];
+    const dataStandard = [
+      cutting.TotalLineBalance,
+      stitching.TotalLineBalance,
+      assembly.TotalLineBalance,
+    ];
+    const dataActual = [
+      cutting.TotalActualLabor,
+      stitching.TotalActualLabor,
+      assembly.TotalActualLabor,
+    ];
+
+    const myChart = new QuickChart();
+
+    myChart.setConfig({
+      type: 'bar',
+      data: {
+        labels: chartLabels,
+        datasets: [
+          {
+            label: 'Standard Labor (LĐ Chuẩn)',
+            data: dataStandard,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Actual Labor (LĐ Thực tế)',
+            data: dataActual,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'MANPOWER COMPARISON (SO SÁNH NHÂN LỰC)',
+          fontSize: 18,
+        },
+        legend: { position: 'bottom' },
+        scales: {
+          yAxes: [
+            {
+              ticks: { beginAtZero: true, stepSize: 1 },
+              scaleLabel: { display: true, labelString: 'Persons (Người)' },
+            },
+          ],
+        },
+        plugins: {
+          datalabels: { anchor: 'end', align: 'top', font: { weight: 'bold' } },
+        },
+      },
+    });
+
+    myChart.setWidth(800);
+    myChart.setHeight(500);
+    myChart.setBackgroundColor('white');
+
+    const imageBuffer = await myChart.toBinary();
+    const imageId = workbook.addImage({
+      buffer: imageBuffer as any,
+      extension: 'png',
+    });
+
+    const chartSheet = workbook.addWorksheet('Line Balance');
+    chartSheet.views = [
+      { showGridLines: false, state: 'normal', zoomScale: 100 },
+    ];
+
+    chartSheet.addImage(imageId, {
+      tl: { col: 1, row: 1 } as any,
+      br: { col: 12, row: 25 } as any,
+    });
 
     return await workbook.xlsx.writeBuffer();
   }

@@ -44,15 +44,15 @@ export const SortableStageItem = ({
       onClick={() => onClick(item)}
     >
       <div className="flex items-center gap-2 overflow-hidden">
+        {/* Chỉ nắm vào đây mới kéo được */}
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab p-1 text-gray-400 hover:text-gray-600 touch-none"
-          onClick={(e) => e.stopPropagation()} // Chặn click xuyên qua
+          className="cursor-grab p-1 text-gray-400 hover:text-gray-600 outline-none touch-none"
+          onClick={(e) => e.stopPropagation()}
         >
           <FaGripVertical />
         </div>
-
         <div className="truncate select-none" title={item.Name}>
           {item.Name}
         </div>

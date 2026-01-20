@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { TablectService } from './tablect.service';
 import { CreateTablectDto } from './dto/create-tablect.dto';
-import { UpdateTablectDto } from './dto/update-tablect.dto';
+import { UpdateOrderDto, UpdateTablectDto } from './dto/update-tablect.dto';
 
 @Controller('tablect')
 export class TablectController {
@@ -38,6 +38,11 @@ export class TablectController {
   @Post('create-data')
   async createData(@Body() body: CreateTablectDto) {
     return this.tablectService.createData(body);
+  }
+
+  @Post('update-order')
+  async updateOrder(@Body() body: UpdateOrderDto) {
+    return this.tablectService.updateOrder(body.ids);
   }
 
   @Patch('save-data')

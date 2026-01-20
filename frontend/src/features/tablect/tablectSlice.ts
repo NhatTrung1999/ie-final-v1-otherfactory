@@ -88,6 +88,18 @@ export const getDepartmentMachineType = createAsyncThunk(
   }
 );
 
+export const tablectUpdateOrder = createAsyncThunk(
+  'tablect/updateOrder',
+  async (ids: string[], { rejectWithValue }) => {
+    try {
+      await tablectApi.updateOrder(ids);
+      return ids;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Update order failed');
+    }
+  }
+);
+
 const initialState: ITableCtState = {
   tablect: [],
   activeColId: null,
@@ -223,6 +235,19 @@ const tablectSlice = createSlice({
           item.Loss = loss;
         }
       });
+    },
+    reorderTableCt: (
+      state,
+      action: PayloadAction<{ activeId: string; overId: string }>
+    ) => {
+      const { activeId, overId } = action.payload;
+      const oldIndex = state.tablect.findIndex((item) => item.Id === activeId);
+      const newIndex = state.tablect.findIndex((item) => item.Id === overId);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const [movedItem] = state.tablect.splice(oldIndex, 1);
+        state.tablect.splice(newIndex, 0, movedItem);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -376,6 +401,7 @@ export const {
   setUpdateAverage,
   setMachineType,
   setUpdateMachineType,
+  reorderTableCt,
 } = tablectSlice.actions;
 
 export default tablectSlice.reducer;

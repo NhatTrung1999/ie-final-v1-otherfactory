@@ -1,5 +1,5 @@
-import React, { Fragment, useEffect, useState, type MouseEvent } from 'react';
-import Select, { type SingleValue } from 'react-select';
+import React, { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { type SingleValue } from 'react-select';
 import {
   TABLE_HEADER,
   type ITableCtPayload,
@@ -12,11 +12,13 @@ import {
   deleteData,
   getData,
   getDepartmentMachineType,
+  reorderTableCt,
   saveData,
   setActiveColId,
   setMachineType,
   setUpdateAverage,
   setUpdateMachineType,
+  tablectUpdateOrder,
 } from '../features/tablect/tablectSlice';
 import {
   resetTypes,
@@ -29,6 +31,22 @@ import excelApi from '../api/excelApi';
 import { toast } from 'react-toastify';
 import { historyplaybackDeleteMultiple } from '../features/historyplayback/historyplaybackSlice';
 import ModalEstimateOutput from './ModalEstimateOutput';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { SortableTableRow } from './SortableTableRow';
 
 const TableCT = () => {
   const { tablect, activeColId, machineTypes, selectedMachineType } =
@@ -46,6 +64,38 @@ const TableCT = () => {
     dispatch(getData({ ...filter }));
     dispatch(getDepartmentMachineType());
   }, [filter, dispatch]);
+
+  const filteredTableCt = useMemo(() => {
+    return tablect
+      .filter((item) => item.Area === activeTabId)
+      .filter((item) => item.CreatedBy === auth?.UserID);
+  }, [tablect, activeTabId, auth?.UserID]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      dispatch(
+        reorderTableCt({
+          activeId: active.id as string,
+          overId: over.id as string,
+        })
+      );
+
+      const oldIndex = filteredTableCt.findIndex(
+        (item) => item.Id === active.id
+      );
+      const newIndex = filteredTableCt.findIndex((item) => item.Id === over.id);
+      const newSortedList = arrayMove(filteredTableCt, oldIndex, newIndex);
+      const idsToSend = newSortedList.map((item) => item.Id);
+
+      dispatch(tablectUpdateOrder(idsToSend));
+    }
+  };
 
   const handleClickRow = (item: ITableData) => {
     const rowId = item.Id;
@@ -194,7 +244,6 @@ const TableCT = () => {
     item: ITableData
   ) => {
     e.stopPropagation();
-    // console.log(item);
     const result = await dispatch(
       saveData({
         Id: item.Id,
@@ -226,7 +275,6 @@ const TableCT = () => {
   };
 
   const handleCheckAction = (item: ITableData) => {
-    // console.log(item);
     const avgNva = item.Nva.Average;
     const avgVa = item.Va.Average;
     if (avgNva > 0 && avgVa > 0) {
@@ -378,7 +426,7 @@ const TableCT = () => {
           </div>
         </div>
         <div className="w-full overflow-x-auto max-h-[450px]">
-          <table className="w-full min-w-max">
+          {/* <table className="w-full min-w-max">
             <thead className=" bg-gray-400 sticky top-0 text-white z-10">
               {TABLE_HEADER.map((item, i) => (
                 <tr key={i}>
@@ -523,7 +571,55 @@ const TableCT = () => {
                   </Fragment>
                 ))}
             </tbody>
-          </table>
+          </table> */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="w-full min-w-max">
+              <thead className=" bg-gray-400 sticky top-0 text-white z-10">
+                {TABLE_HEADER.map((item, i) => (
+                  <tr key={i}>
+                    <th className="px-4 py-4">{item.No}</th>
+                    <th className="px-4 py-4">{item.ProgressStagePartName}</th>
+                    <th className="px-4 py-4">{item.Type}</th>
+                    {Array.from({ length: item.Cts }).map((_, i) => (
+                      <th key={i} className="px-4 py-4">
+                        CT{i + 1}
+                      </th>
+                    ))}
+                    <th className="px-4 py-4">{item.Average}</th>
+                    <th className="px-4 py-4">{item.MachineType}</th>
+                    <th className="px-4 py-4">{item.Confirm}</th>
+                    <th className="px-4 py-4">{item.Action}</th>
+                  </tr>
+                ))}
+              </thead>
+
+              <tbody>
+                <SortableContext
+                  items={filteredTableCt.map((item) => item.Id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {filteredTableCt.map((item) => (
+                    <SortableTableRow
+                      key={item.Id}
+                      item={item}
+                      activeItemId={activeItemId}
+                      activeColId={activeColId}
+                      machineTypes={machineTypes}
+                      handleClickRow={handleClickRow}
+                      handleClickColumn={handleClickColumn}
+                      handleCheckAction={handleCheckAction}
+                      handleCheckDisabled={handleCheckDisabled}
+                      handleChangeMachineType={handleChangeMachineType}
+                    />
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+          </DndContext>
         </div>
       </div>
       {isOpen && <ModalEstimateOutput setIsOpen={setIsOpen} />}

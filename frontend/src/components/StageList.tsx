@@ -11,9 +11,14 @@ import {
   setPath,
   stagelistDelete,
   stagelistList,
+  stagelistUpdateOrder,
 } from '../features/stagelist/stagelistSlice';
 import type { ITableCtPayload } from '../types/tablect';
-import { createData, setActiveColId } from '../features/tablect/tablectSlice';
+import {
+  createData,
+  deleteData,
+  setActiveColId,
+} from '../features/tablect/tablectSlice';
 import { toast } from 'react-toastify';
 import {
   resetTypes,
@@ -34,6 +39,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  arrayMove,
 } from '@dnd-kit/sortable';
 import { SortableStageItem } from './SortableStageItem';
 
@@ -97,6 +103,8 @@ const StageList = () => {
 
     if (stagelistDelete.fulfilled.match(result)) {
       toast.success('Delete success!');
+      await dispatch(deleteData(id));
+      dispatch(setPath(''));
     } else {
       toast.error(result.payload as string);
     }
@@ -165,9 +173,7 @@ const StageList = () => {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5, // Di chuyển chuột 5px mới tính là kéo -> giúp click chọn item không bị lỗi
-      },
+      activationConstraint: { distance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -178,13 +184,28 @@ const StageList = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      // Dispatch action cập nhật Redux dùng ID
+      // a. Cập nhật UI ngay lập tức (Optimistic)
       dispatch(
         reorderStagelist({
           activeId: active.id as string,
           overId: over.id as string,
         })
       );
+
+      // b. Tính toán danh sách ID mới để gửi Server
+      // Lưu ý: Ta lấy thứ tự từ filteredStagelist, giả lập di chuyển trên đó để lấy list ID đúng
+      const oldIndex = filteredStagelist.findIndex(
+        (item) => item.Id === active.id
+      );
+      const newIndex = filteredStagelist.findIndex(
+        (item) => item.Id === over.id
+      );
+
+      const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);
+      const idsToSend = newSortedList.map((item) => item.Id);
+
+      // c. Gọi API lưu
+      dispatch(stagelistUpdateOrder(idsToSend));
     }
   };
 
@@ -260,7 +281,7 @@ const StageList = () => {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={filteredStagelist.map((item) => item.Id)} // Quan trọng: Truyền mảng ID đã lọc
+              items={filteredStagelist.map((item) => item.Id)}
               strategy={verticalListSortingStrategy}
             >
               {filteredStagelist.map((item) => (

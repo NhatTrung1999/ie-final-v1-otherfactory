@@ -29,6 +29,10 @@ const tablectApi = {
     const res = await axiosConfig.get('tablect/get-department-machine-type');
     return res.data;
   },
+  updateOrder: async (ids: string[]) => {
+    const res = await axiosConfig.post('tablect/update-order', { ids });
+    return res.data;
+  },
 };
 
 export default tablectApi;

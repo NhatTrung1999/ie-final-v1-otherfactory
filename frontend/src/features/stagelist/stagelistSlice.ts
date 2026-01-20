@@ -106,6 +106,20 @@ export const stagelistDelete = createAsyncThunk(
   }
 );
 
+export const stagelistUpdateOrder = createAsyncThunk(
+  'stagelist/updateOrder',
+  async (ids: string[], { rejectWithValue }) => {
+    try {
+      await stagelistApi.stagelistUpdateOrder(ids);
+      return ids;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || 'Update order failed'
+      );
+    }
+  }
+);
+
 const stagelistSlice = createSlice({
   name: 'stagelist',
   initialState,
@@ -144,7 +158,6 @@ const stagelistSlice = createSlice({
       action: PayloadAction<{ activeId: string; overId: string }>
     ) => {
       const { activeId, overId } = action.payload;
-
       const oldIndex = state.stagelist.findIndex(
         (item) => item.Id === activeId
       );

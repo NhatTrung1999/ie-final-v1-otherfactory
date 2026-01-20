@@ -185,7 +185,10 @@ export class StagelistService {
       `SELECT *
         FROM IE_StageList
         ${where}
-        ORDER BY CreatedAt`,
+        ORDER BY 
+          CASE WHEN OrderIndex IS NULL THEN 1 ELSE 0 END, 
+          OrderIndex ASC, 
+          CreatedAt DESC`,
       { replacements, type: QueryTypes.SELECT },
     );
     records = records.map((item) => {
@@ -199,22 +202,48 @@ export class StagelistService {
     return records;
   }
 
+  async updateOrder(ids: string[]) {
+    const transaction = await this.IE.transaction();
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        await this.IE.query(
+          `UPDATE IE_StageList SET OrderIndex = ? WHERE Id = ?`,
+          {
+            replacements: [i, id],
+            type: QueryTypes.UPDATE,
+            transaction: transaction,
+          },
+        );
+      }
+      await transaction.commit();
+      return { message: 'Order updated successfully' };
+    } catch (error) {
+      await transaction.rollback();
+      throw new InternalServerErrorException('Failed to update order');
+    }
+  }
+
   async stagelistDelete(id: string): Promise<IStageListData[]> {
     const record: IStageListData[] = await this.IE.query(
       `SELECT * FROM IE_StageList WHERE Id = ?`,
       { replacements: [id], type: QueryTypes.SELECT },
     );
 
-    const checkExist: ITablectData[] = await this.IE.query(
-      `SELECT * FROM IE_TableCT WHERE Id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT },
-    );
+    // const checkExist: ITablectData[] = await this.IE.query(
+    //   `SELECT * FROM IE_TableCT WHERE Id = ?`,
+    //   { replacements: [id], type: QueryTypes.SELECT },
+    // );
 
-    if (checkExist.length > 0) {
-      throw new BadRequestException(
-        'Please delete data related in TableCT before!',
-      );
-    }
+    // if (checkExist.length > 0) {
+    //   // throw new BadRequestException(
+    //   //   'Please delete data related in TableCT before!',
+    //   // );
+    //   await this.IE.query(`DELETE FROM IE_TableCT WHERE Id = ?`, {
+    //     replacements: [id],
+    //     type: QueryTypes.DELETE,
+    //   });
+    // }
 
     if (!record.length) {
       throw new NotFoundException(`No stagelist found with Id: ${id}`);
@@ -235,10 +264,19 @@ export class StagelistService {
       fs.rmdirSync(dir, { recursive: true });
     }
 
-    const records: IStageListData[] = await this.IE.query(
+    let records: IStageListData[] = await this.IE.query(
       `SELECT * FROM IE_StageList`,
       { replacements: [id], type: QueryTypes.SELECT },
     );
+
+    records = records.map((item) => {
+      const normalizedPath = item.Path.replace(/\\/g, '/');
+      const relativePath = normalizedPath.split('/IE_VIDEO')[1];
+      return {
+        ...item,
+        Path: `${this.configService.get('BASEPATH')}/IE_VIDEO${relativePath}`,
+      };
+    });
 
     return records;
   }

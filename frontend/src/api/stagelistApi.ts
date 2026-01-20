@@ -31,6 +31,10 @@ const stagelistApi = {
     const res = await axiosConfig.delete(`stagelist/stagelist-delete/${id}`);
     return res.data;
   },
+  stagelistUpdateOrder: async (ids: string[]) => {
+    const res = await axiosConfig.post('stagelist/update-order', { ids });
+    return res.data;
+  },
 };
 
 export default stagelistApi;
