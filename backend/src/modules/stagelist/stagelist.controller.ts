@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -57,5 +58,15 @@ export class StagelistController {
   @Delete('stagelist-delete/:id')
   async stagelistDelete(@Param('id') id: string) {
     return await this.stagelistService.stagelistDelete(id);
+  }
+
+  @Patch('mark-completed/:id')
+  async markCompleted(@Param('id') id: string) {
+    return this.stagelistService.markCompleted(id);
+  }
+
+  @Post('stagelist-duplicate')
+  async stagelistDuplicate(@Body() body: { ids: string[] }) {
+    return this.stagelistService.stagelistDuplicate(body.ids);
   }
 }

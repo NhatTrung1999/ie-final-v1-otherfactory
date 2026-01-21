@@ -280,4 +280,131 @@ export class StagelistService {
 
     return records;
   }
+
+  async markCompleted(id: string) {
+    await this.IE.query(
+      `UPDATE IE_StageList
+        SET
+          IsCompleted = '1'
+        WHERE Id = ?`,
+      { replacements: [id], type: QueryTypes.SELECT },
+    );
+    return { message: 'Mark completed is success!' };
+  }
+
+  async stagelistDuplicate(ids: string[]) {
+    const transaction = await this.IE.transaction();
+    const newItems: IStageListData[] = [];
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentDateFolder = `${year}-${month}-${day}`;
+
+    const basePath =
+      this.configService.get('UPLOAD_DESTINATION') ||
+      '\\\\192.168.0.102\\cie\\IE_VIDEO';
+    try {
+      for (const id of ids) {
+        const oldStagelist: IStageListData[] = await this.IE.query(
+          `SELECT *
+          FROM IE_StageList
+          WHERE Id = ?
+          `,
+          { replacements: [id], type: QueryTypes.SELECT, transaction },
+        );
+        if (!oldStagelist.length) continue;
+
+        const origin = oldStagelist[0];
+
+        const newId = uuidv4();
+
+        const oldPath = origin.Path;
+        let newPath = oldPath;
+
+        if (oldPath && fs.existsSync(oldPath)) {
+          const extension = path.extname(oldPath);
+          const fileName = path.basename(oldPath, extension);
+          const targetDir = path.join(
+            basePath,
+            currentDateFolder,
+            origin.Season || 'UnknowSeason',
+            origin.Stage || 'UnknowStage',
+            origin.Area || 'UnknowArea',
+            origin.Article || 'UnknowArticle',
+          );
+          if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+          }
+
+          const newFileName = `${fileName}_copy_${Date.now()}${extension}`;
+          newPath = path.join(targetDir, newFileName);
+
+          fs.copyFileSync(oldPath, newPath);
+        }
+        await this.IE.query(
+          `INSERT INTO IE_StageList
+          (
+            Id,
+            [Date],
+            Season,
+            Stage,
+            CutDie,
+            Area,
+            Article,
+            Name,
+            [Path],
+            CreatedBy,
+            CreatedFactory,
+            CreatedAt
+          )
+          VALUES
+          (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            GETDATE()
+          )`,
+          {
+            replacements: [
+              newId,
+              currentDateFolder,
+              origin.Season,
+              origin.Stage,
+              origin.CutDie,
+              origin.Area,
+              origin.Article,
+              `${origin.Name} - Copy`,
+              newPath,
+              origin.CreatedBy,
+              origin.CreatedFactory,
+            ],
+            type: QueryTypes.INSERT,
+            transaction,
+          },
+        );
+
+        const newItem: IStageListData[] = await this.IE.query(
+          `SELECT * FROM IE_StageList WHERE Id = ?`,
+          { replacements: [newId], type: QueryTypes.SELECT, transaction },
+        );
+        if (newItem.length) newItems.push(newItem[0]);
+      }
+      await transaction.commit();
+      return { message: 'Duplicate success', data: newItems };
+    } catch (error) {
+      await transaction.rollback();
+      throw new InternalServerErrorException(
+        'Duplicate failed: ' + error.message,
+      );
+    }
+  }
 }

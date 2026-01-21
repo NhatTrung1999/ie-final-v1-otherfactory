@@ -3,6 +3,7 @@ export interface IStageListData {
   Date: string;
   Season: string;
   Stage: string;
+  CutDie: string;
   Area: string;
   Article: string;
   Name: string;
@@ -10,4 +11,6 @@ export interface IStageListData {
   CreatedBy: string;
   CreatedFactory: string;
   CreatedAt: string;
+  OrderIndex: number;
+  IsCompleted: boolean;
 }
