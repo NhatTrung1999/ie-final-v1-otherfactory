@@ -8,6 +8,7 @@ import {
   reorderStagelist,
   setActiveItemId,
   setActiveTabId,
+  setIsSearch,
   setPath,
   stagelistDelete,
   stagelistList,
@@ -49,14 +50,14 @@ const StageList = () => {
   const startX = useRef<number>(0);
   const scrollLeftStart = useRef<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { stagelist, activeTabId, activeItemId, filter } = useAppSelector(
-    (state) => state.stagelist
-  );
+  const { stagelist, activeTabId, activeItemId, filter, isSearch } =
+    useAppSelector((state) => state.stagelist);
   const { tablect } = useAppSelector((state) => state.tablect);
   const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    dispatch(setIsSearch(true));
     dispatch(stagelistList({ ...filter }));
   }, [dispatch, filter]);
 
@@ -162,14 +163,20 @@ const StageList = () => {
   };
 
   const handleRefresh = () => {
+    dispatch(setIsSearch(false));
     dispatch(stagelistList({ ...filter }));
   };
 
   const filteredStagelist = useMemo(() => {
-    return stagelist
+    let data = stagelist
       .filter((item) => item.Area === activeTabId)
       .filter((item) => item.CreatedBy === auth?.UserID);
-  }, [stagelist, activeTabId, auth?.UserID]);
+    if (!isSearch) {
+      data = data.filter((item) => !item.IsCompleted);
+    }
+
+    return data;
+  }, [stagelist, activeTabId, auth?.UserID, isSearch]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -184,7 +191,6 @@ const StageList = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      // a. Cập nhật UI ngay lập tức (Optimistic)
       dispatch(
         reorderStagelist({
           activeId: active.id as string,
@@ -192,8 +198,6 @@ const StageList = () => {
         })
       );
 
-      // b. Tính toán danh sách ID mới để gửi Server
-      // Lưu ý: Ta lấy thứ tự từ filteredStagelist, giả lập di chuyển trên đó để lấy list ID đúng
       const oldIndex = filteredStagelist.findIndex(
         (item) => item.Id === active.id
       );
@@ -204,7 +208,6 @@ const StageList = () => {
       const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);
       const idsToSend = newSortedList.map((item) => item.Id);
 
-      // c. Gọi API lưu
       dispatch(stagelistUpdateOrder(idsToSend));
     }
   };

@@ -33,6 +33,7 @@ const initialState: IStageListState = {
     Article: '',
     Account: '',
   },
+  isSearch: true,
   loading: false,
   error: null,
 };
@@ -120,6 +121,18 @@ export const stagelistUpdateOrder = createAsyncThunk(
   }
 );
 
+export const stagelistMarkCompleted = createAsyncThunk(
+  'stagelist/mark-completed',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const res = await stagelistApi.stagelistMarkCompleted(id);
+      console.log(res);
+    } catch (error) {
+      return rejectWithValue(error || 'Mark completed is failed!');
+    }
+  }
+);
+
 const stagelistSlice = createSlice({
   name: 'stagelist',
   initialState,
@@ -152,6 +165,9 @@ const stagelistSlice = createSlice({
     },
     setFilter: (state, action: PayloadAction<IFilter>) => {
       state.filter = { ...action.payload };
+    },
+    setIsSearch: (state, action: PayloadAction<boolean>) => {
+      state.isSearch = action.payload;
     },
     reorderStagelist: (
       state,
@@ -229,6 +245,7 @@ export const {
   setActiveItemId,
   setFormUploadVideo,
   setFilter,
+  setIsSearch,
   reorderStagelist,
 } = stagelistSlice.actions;
 

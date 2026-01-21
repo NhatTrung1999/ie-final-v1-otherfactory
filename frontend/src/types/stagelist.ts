@@ -18,6 +18,8 @@ export interface IStageList {
   CreatedBy: string;
   CreatedFactory: string;
   CreatedAt: string;
+  OrderIndex: number;
+  IsCompleted: boolean;
 }
 
 export interface IFilter {
@@ -48,4 +50,5 @@ export interface IStageListState {
     article: string;
   };
   filter?: IFilter;
+  isSearch: boolean;
 }

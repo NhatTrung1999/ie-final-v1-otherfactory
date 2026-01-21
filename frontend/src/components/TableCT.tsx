@@ -6,7 +6,11 @@ import {
   type ITableData,
 } from '../types/tablect';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { setActiveItemId, setPath } from '../features/stagelist/stagelistSlice';
+import {
+  setActiveItemId,
+  setPath,
+  stagelistMarkCompleted,
+} from '../features/stagelist/stagelistSlice';
 import {
   confirmData,
   deleteData,
@@ -51,9 +55,8 @@ import { SortableTableRow } from './SortableTableRow';
 const TableCT = () => {
   const { tablect, activeColId, machineTypes, selectedMachineType } =
     useAppSelector((state) => state.tablect);
-  const { activeItemId, activeTabId, filter } = useAppSelector(
-    (state) => state.stagelist
-  );
+  const { activeItemId, activeTabId, filter, stagelist, isSearch } =
+    useAppSelector((state) => state.stagelist);
   const { currentTime } = useAppSelector((state) => state.controlpanel);
   const { auth } = useAppSelector((state) => state.auth);
   const category = localStorage.getItem('category');
@@ -65,11 +68,20 @@ const TableCT = () => {
     dispatch(getDepartmentMachineType());
   }, [filter, dispatch]);
 
+  const completedStageIds = useMemo(
+    () => stagelist.filter((s) => s.IsCompleted).map((s) => s.Id),
+    [stagelist]
+  );
+
   const filteredTableCt = useMemo(() => {
-    return tablect
+    let data = tablect
       .filter((item) => item.Area === activeTabId)
       .filter((item) => item.CreatedBy === auth?.UserID);
-  }, [tablect, activeTabId, auth?.UserID]);
+    if (!isSearch) {
+      data = data.filter((item) => !completedStageIds.includes(item.Id));
+    }
+    return data;
+  }, [tablect, activeTabId, auth?.UserID, completedStageIds, isSearch]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -159,7 +171,7 @@ const TableCT = () => {
 
   const handleConfirm = async () => {
     // console.log(activeTabId);
-    const newTablect: ITableCtPayload[] = tablect
+    const newTablect: ITableCtPayload[] = filteredTableCt
       .filter((item) => item.Area.toLowerCase() === activeTabId.toLowerCase())
       .filter((item) => item.ConfirmId === null)
       .map((item) => ({
@@ -168,11 +180,11 @@ const TableCT = () => {
         Va: JSON.stringify(item.Va),
         ConfirmId: auth?.UserID || '',
       }));
-    // console.log(newTablect);
+    console.log(newTablect);
     let result = await dispatch(confirmData(newTablect));
     if (confirmData.fulfilled.match(result)) {
       await dispatch(getData({ ...filter }));
-      const checkConfirmId = tablect
+      const checkConfirmId = filteredTableCt
         .filter((item) => item.Area.toLowerCase() === activeTabId.toLowerCase())
         .every((item) => item.ConfirmId !== null);
       console.log(checkConfirmId);
@@ -186,7 +198,7 @@ const TableCT = () => {
   };
 
   const handleExcelLSA = async () => {
-    const isConfirm = tablect.every((item) => item.ConfirmId !== null);
+    const isConfirm = filteredTableCt.every((item) => item.ConfirmId !== null);
 
     if (isConfirm) {
       setIsOpen(true);
@@ -214,7 +226,7 @@ const TableCT = () => {
   };
 
   const handleExcelTimeStudy = async () => {
-    const isConfirm = tablect.every((item) => item.ConfirmId !== null);
+    const isConfirm = filteredTableCt.every((item) => item.ConfirmId !== null);
     if (isConfirm) {
       try {
         const res = await excelApi.exportTimeStudy({
@@ -261,6 +273,7 @@ const TableCT = () => {
     );
     if (saveData.fulfilled.match(result)) {
       dispatch(getData({ ...filter }));
+      await dispatch(stagelistMarkCompleted(item.Id));
     }
     dispatch(setActiveItemId(null));
     dispatch(setPath(''));
@@ -334,7 +347,7 @@ const TableCT = () => {
             <div className="flex items-center gap-2">
               <button
                 className={`bg-red-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                  tablect
+                  filteredTableCt
                     .filter((item) => item.Area === activeTabId)
                     .filter((item) => item.CreatedBy === auth?.UserID)
                     .length === 0
@@ -343,7 +356,7 @@ const TableCT = () => {
                 }`}
                 onClick={handleSync}
                 disabled={
-                  tablect
+                  filteredTableCt
                     .filter((item) => item.Area === activeTabId)
                     .filter((item) => item.CreatedBy === auth?.UserID)
                     .length === 0
@@ -355,7 +368,7 @@ const TableCT = () => {
               </button>
               <button
                 className={`bg-blue-500 px-2 py-1 font-semibold rounded-md  ${
-                  tablect
+                  filteredTableCt
                     .filter((item) => item.Area === activeTabId)
                     .filter((item) => item.CreatedBy === auth?.UserID)
                     .length === 0
@@ -364,7 +377,7 @@ const TableCT = () => {
                 }`}
                 onClick={handleConfirm}
                 disabled={
-                  tablect
+                  filteredTableCt
                     .filter((item) => item.Area === activeTabId)
                     .filter((item) => item.CreatedBy === auth?.UserID)
                     .length === 0
@@ -378,7 +391,7 @@ const TableCT = () => {
                 'LSA'.trim().toLowerCase() && (
                 <button
                   className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                    tablect
+                    filteredTableCt
                       .filter((item) => item.Area === activeTabId)
                       .filter((item) => item.CreatedBy === auth?.UserID)
                       .length === 0
@@ -387,7 +400,7 @@ const TableCT = () => {
                   }`}
                   onClick={handleExcelLSA}
                   disabled={
-                    tablect
+                    filteredTableCt
                       .filter((item) => item.Area === activeTabId)
                       .filter((item) => item.CreatedBy === auth?.UserID)
                       .length === 0
@@ -402,7 +415,7 @@ const TableCT = () => {
                 'LSA'.trim().toLowerCase() && (
                 <button
                   className={`bg-green-500 px-2 py-1 font-semibold rounded-md hover:opacity-70 ${
-                    tablect
+                    filteredTableCt
                       .filter((item) => item.Area === activeTabId)
                       .filter((item) => item.CreatedBy === auth?.UserID)
                       .length === 0
@@ -411,7 +424,7 @@ const TableCT = () => {
                   }`}
                   onClick={handleExcelTimeStudy}
                   disabled={
-                    tablect
+                    filteredTableCt
                       .filter((item) => item.Area === activeTabId)
                       .filter((item) => item.CreatedBy === auth?.UserID)
                       .length === 0
