@@ -4,6 +4,7 @@ import stagelistReducer from '../features/stagelist/stagelistSlice';
 import tablectReducer from '../features/tablect/tablectSlice';
 import controlpanelReducer from '../features/controlpanel/controlpanelSlice';
 import historyplaybackReducer from '../features/historyplayback/historyplaybackSlice';
+import duplicateReducer from '../features/duplicate/duplicateSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     tablect: tablectReducer,
     controlpanel: controlpanelReducer,
     historyplayback: historyplaybackReducer,
+    duplicate: duplicateReducer,
   },
 });
 

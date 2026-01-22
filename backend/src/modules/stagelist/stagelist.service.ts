@@ -295,6 +295,8 @@ export class StagelistService {
   async stagelistDuplicate(ids: string[]) {
     const transaction = await this.IE.transaction();
     const newItems: IStageListData[] = [];
+    const createdFiles: string[] = [];
+
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -316,7 +318,6 @@ export class StagelistService {
         if (!oldStagelist.length) continue;
 
         const origin = oldStagelist[0];
-
         const newId = uuidv4();
 
         const oldPath = origin.Path;
@@ -334,13 +335,31 @@ export class StagelistService {
             origin.Article || 'UnknowArticle',
           );
           if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
+            try {
+              fs.mkdirSync(targetDir, { recursive: true });
+            } catch (error) {
+              throw new Error(
+                `Không thể tạo thư mục lưu trữ: ${error.message}`,
+              );
+            }
           }
 
-          const newFileName = `${fileName}_copy_${Date.now()}${extension}`;
-          newPath = path.join(targetDir, newFileName);
+          let newFileName = `${fileName}${extension}`;
+          let newPath = path.join(targetDir, newFileName);
 
-          fs.copyFileSync(oldPath, newPath);
+          if (fs.existsSync(newPath)) {
+            newFileName = `${fileName}_copy_${Date.now()}${extension}`;
+            newPath = path.join(targetDir, newFileName);
+          }
+
+          try {
+            fs.copyFileSync(oldPath, newPath);
+            createdFiles.push(newPath);
+          } catch (error) {
+            throw new Error(
+              `Lỗi khi copy video (${fileName}): ${error.message}`,
+            );
+          }
         }
         await this.IE.query(
           `INSERT INTO IE_StageList
@@ -382,7 +401,7 @@ export class StagelistService {
               origin.CutDie,
               origin.Area,
               origin.Article,
-              `${origin.Name} - Copy`,
+              origin.Name,
               newPath,
               origin.CreatedBy,
               origin.CreatedFactory,
@@ -402,6 +421,17 @@ export class StagelistService {
       return { message: 'Duplicate success', data: newItems };
     } catch (error) {
       await transaction.rollback();
+      if (createdFiles.length > 0) {
+        for (const file of createdFiles) {
+          try {
+            if (fs.existsSync(file)) {
+              fs.unlinkSync(file);
+            }
+          } catch (error) {
+            console.error(`Không thể xóa file rác: ${file}`, error);
+          }
+        }
+      }
       throw new InternalServerErrorException(
         'Duplicate failed: ' + error.message,
       );

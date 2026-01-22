@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaCircleUser } from 'react-icons/fa6';
+import { IoDuplicateOutline } from 'react-icons/io5';
 import { TbLogout, TbFilterCog } from 'react-icons/tb';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
@@ -12,10 +13,12 @@ import {
   stagelistList,
 } from '../features/stagelist/stagelistSlice';
 import { getData, setActiveColId } from '../features/tablect/tablectSlice';
+import ModalDuplicate from './ModalDuplicate';
 
 const Header = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isDuplicateOpen, setIsDuplicateOpen] = useState<boolean>(false);
   const { filter } = useAppSelector((state) => state.stagelist);
   const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -46,6 +49,10 @@ const Header = () => {
     setIsFilterOpen(!isFilterOpen);
   };
 
+  const toggleDuplicate = () => {
+    setIsDuplicateOpen(!isDuplicateOpen);
+  };
+
   const handleLogout = () => {
     dispatch(logout());
   };
@@ -55,6 +62,12 @@ const Header = () => {
       <header className="h-[70px] bg-gray-600 sticky top-0 flex items-center justify-between px-3 z-60">
         <div className="text-xl text-white font-bold">IE Video CT System</div>
         <div className="flex items-center gap-2">
+          <div
+            className="p-2 bg-gray-300/40 rounded-full text-white cursor-pointer"
+            onClick={toggleDuplicate}
+          >
+            <IoDuplicateOutline size={22} />
+          </div>
           <div
             className="p-2 bg-gray-300/40 rounded-full text-white cursor-pointer"
             onClick={toggleFilter}
@@ -214,6 +227,9 @@ const Header = () => {
             </div>
           </form>
         </div>
+      )}
+      {isDuplicateOpen && (
+        <ModalDuplicate setIsDuplicateOpen={setIsDuplicateOpen} />
       )}
     </>
   );

@@ -12,6 +12,7 @@ import { HistoryplaybackModule } from './modules/historyplayback/historyplayback
 import { ExcelModule } from './modules/excel/excel.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { DuplicateModule } from './modules/duplicate/duplicate.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { join } from 'path';
     TablectModule,
     HistoryplaybackModule,
     ExcelModule,
+    DuplicateModule,
   ],
   controllers: [AppController],
   providers: [
