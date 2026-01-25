@@ -65,8 +65,8 @@ export class StagelistController {
     return this.stagelistService.markCompleted(id);
   }
 
-  @Post('stagelist-duplicate')
-  async stagelistDuplicate(@Body() body: { ids: string[] }) {
-    return this.stagelistService.stagelistDuplicate(body.ids);
-  }
+  // @Post('stagelist-duplicate')
+  // async stagelistDuplicate(@Body() body: { ids: string[] }) {
+  //   return this.stagelistService.stagelistDuplicate(body.ids);
+  // }
 }

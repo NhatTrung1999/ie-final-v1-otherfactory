@@ -92,10 +92,12 @@ export class DuplicateService {
       '\\\\192.168.0.102\\cie\\IE_VIDEO';
     try {
       for (const id of ids) {
-        const oldStagelist: IStageListData[] = await this.IE.query(
-          `SELECT *
-          FROM IE_StageList
-          WHERE Id = ?
+        const oldStagelist: any[] = await this.IE.query(
+          `SELECT tb.*,
+                  sl.Date, sl.Season, sl.Stage, sl.CutDie, sl.Area, sl.Article, sl.Name, sl.CreatedFactory
+            FROM IE_TableCT AS tb
+            LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
+            WHERE tb.Id = ?
           `,
           { replacements: [id], type: QueryTypes.SELECT, transaction },
         );
@@ -189,6 +191,30 @@ export class DuplicateService {
               newPath,
               origin.CreatedBy,
               origin.CreatedFactory,
+            ],
+            type: QueryTypes.INSERT,
+            transaction,
+          },
+        );
+
+        await this.IE.query(
+          `INSERT INTO IE_TableCT 
+           (Id, [No], ProgressStagePartName, Area, [Path], Nva, Va, MachineType, Loss, IsSave, CreatedBy, CreatedAt, OrderIndex)
+           VALUES 
+           (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
+          {
+            replacements: [
+              newId,
+              origin.No,
+              origin.ProgressStagePartName,
+              origin.Area,
+              newPath,
+              origin.Nva,
+              origin.Va,
+              origin.MachineType,
+              origin.Loss,
+              origin.IsSave,
+              origin.CreatedBy,
             ],
             type: QueryTypes.INSERT,
             transaction,
