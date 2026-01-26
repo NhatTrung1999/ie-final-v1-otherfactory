@@ -224,7 +224,7 @@ export class StagelistService {
     }
   }
 
-  async stagelistDelete(id: string): Promise<IStageListData[]> {
+  async stagelistDelete(id: string): Promise<{ message: string }> {
     const record: IStageListData[] = await this.IE.query(
       `SELECT * FROM IE_StageList WHERE Id = ?`,
       { replacements: [id], type: QueryTypes.SELECT },
@@ -264,21 +264,21 @@ export class StagelistService {
       fs.rmdirSync(dir, { recursive: true });
     }
 
-    let records: IStageListData[] = await this.IE.query(
-      `SELECT * FROM IE_StageList`,
-      { replacements: [id], type: QueryTypes.SELECT },
-    );
+    // let records: IStageListData[] = await this.IE.query(
+    //   `SELECT * FROM IE_StageList`,
+    //   { replacements: [id], type: QueryTypes.SELECT },
+    // );
 
-    records = records.map((item) => {
-      const normalizedPath = item.Path.replace(/\\/g, '/');
-      const relativePath = normalizedPath.split('/IE_VIDEO')[1];
-      return {
-        ...item,
-        Path: `${this.configService.get('BASEPATH')}/IE_VIDEO${relativePath}`,
-      };
-    });
+    // records = records.map((item) => {
+    //   const normalizedPath = item.Path.replace(/\\/g, '/');
+    //   const relativePath = normalizedPath.split('/IE_VIDEO')[1];
+    //   return {
+    //     ...item,
+    //     Path: `${this.configService.get('BASEPATH')}/IE_VIDEO${relativePath}`,
+    //   };
+    // });
 
-    return records;
+    return { message: 'Deleted successfully' };
   }
 
   async markCompleted(id: string) {

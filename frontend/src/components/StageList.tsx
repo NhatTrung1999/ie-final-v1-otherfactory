@@ -96,15 +96,16 @@ const StageList = () => {
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLDivElement>,
-    id: string
+    id: string,
   ) => {
     e.stopPropagation();
 
     const result = await dispatch(stagelistDelete(id));
 
     if (stagelistDelete.fulfilled.match(result)) {
-      toast.success('Delete success!');
+      toast.success(result.payload.message || 'Delete successfully!');
       await dispatch(deleteData(id));
+      await dispatch(stagelistList({ ...filter }));
       dispatch(setPath(''));
     } else {
       toast.error(result.payload as string);
@@ -184,7 +185,7 @@ const StageList = () => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -195,14 +196,14 @@ const StageList = () => {
         reorderStagelist({
           activeId: active.id as string,
           overId: over.id as string,
-        })
+        }),
       );
 
       const oldIndex = filteredStagelist.findIndex(
-        (item) => item.Id === active.id
+        (item) => item.Id === active.id,
       );
       const newIndex = filteredStagelist.findIndex(
-        (item) => item.Id === over.id
+        (item) => item.Id === over.id,
       );
 
       const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);

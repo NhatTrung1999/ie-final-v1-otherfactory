@@ -18,7 +18,6 @@ import { CTData, RowLSA, Section, SectionLSA, TimeStudyData } from './types';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
 import { ITablectData, ITablectType } from 'src/types/tablect';
-// import QuickChart from 'quickchart-js';
 const QuickChart = require('quickchart-js');
 
 @Injectable()
@@ -1912,81 +1911,242 @@ export class ExcelService {
       }
     }
 
-    const chartLabels = ['Cutting (Chặt)', 'Stitching (May)', 'Assembly (Gò)'];
-    const dataStandard = [
-      cutting.TotalLineBalance,
-      stitching.TotalLineBalance,
-      assembly.TotalLineBalance,
-    ];
-    const dataActual = [
-      cutting.TotalActualLabor,
-      stitching.TotalActualLabor,
-      assembly.TotalActualLabor,
-    ];
+    // const chartLabels = ['Cutting (Chặt)', 'Stitching (May)', 'Assembly (Gò)'];
+    // const dataStandard = [
+    //   cutting.TotalLineBalance,
+    //   stitching.TotalLineBalance,
+    //   assembly.TotalLineBalance,
+    // ];
+    // const dataActual = [
+    //   cutting.TotalActualLabor,
+    //   stitching.TotalActualLabor,
+    //   assembly.TotalActualLabor,
+    // ];
 
-    const myChart = new QuickChart();
+    // const myChart = new QuickChart();
 
-    myChart.setConfig({
-      type: 'bar',
-      data: {
-        labels: chartLabels,
-        datasets: [
-          {
-            label: 'Standard Labor (LĐ Chuẩn)',
-            data: dataStandard,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgb(54, 162, 235)',
-            borderWidth: 1,
-          },
-          {
-            label: 'Actual Labor (LĐ Thực tế)',
-            data: dataActual,
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            borderColor: 'rgb(255, 99, 132)',
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        title: {
-          display: true,
-          text: 'MANPOWER COMPARISON (SO SÁNH NHÂN LỰC)',
-          fontSize: 18,
-        },
-        legend: { position: 'bottom' },
-        scales: {
-          yAxes: [
-            {
-              ticks: { beginAtZero: true, stepSize: 1 },
-              scaleLabel: { display: true, labelString: 'Persons (Người)' },
-            },
-          ],
-        },
-        plugins: {
-          datalabels: { anchor: 'end', align: 'top', font: { weight: 'bold' } },
-        },
-      },
-    });
+    // myChart.setConfig({
+    //   type: 'line',
+    //   data: {
+    //     labels: chartLabels,
+    //     datasets: [
+    //       {
+    //         label: 'Standard Labor (LĐ Chuẩn)',
+    //         data: dataStandard,
+    //         borderColor: 'rgb(54, 162, 235)',
+    //         backgroundColor: 'rgb(54, 162, 235)',
+    //         borderWidth: 2,
+    //         fill: false,
+    //         tension: 0.1,
+    //         pointRadius: 4,
+    //         pointHoverRadius: 6,
+    //       },
+    //       {
+    //         label: 'Actual Labor (LĐ Thực tế)',
+    //         data: dataActual,
+    //         borderColor: 'rgb(255, 99, 132)',
+    //         backgroundColor: 'rgb(255, 99, 132)',
+    //         borderWidth: 2,
+    //         fill: false,
+    //         tension: 0.1,
+    //         pointRadius: 4,
+    //         pointHoverRadius: 6,
+    //       },
+    //     ],
+    //   },
+    //   options: {
+    //     title: {
+    //       display: true,
+    //       text: 'MANPOWER COMPARISON (SO SÁNH NHÂN LỰC)',
+    //       fontSize: 18,
+    //     },
+    //     legend: { position: 'bottom' },
+    //     scales: {
+    //       yAxes: [
+    //         {
+    //           ticks: {
+    //             beginAtZero: true,
+    //             stepSize: 1,
+    //             padding: 10,
+    //           },
+    //           scaleLabel: { display: true, labelString: 'Persons (Người)' },
+    //           gridLines: {
+    //             drawBorder: true,
+    //             color: 'rgba(200, 200, 200, 0.3)',
+    //           },
+    //         },
+    //       ],
+    //       xAxes: [
+    //         {
+    //           gridLines: {
+    //             display: false,
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     plugins: {
+    //       datalabels: {
+    //         anchor: 'end',
+    //         align: 'top',
+    //         backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    //         borderRadius: 4,
+    //         font: { weight: 'bold' },
+    //         offset: 4,
+    //       },
+    //     },
+    //   },
+    // });
 
-    myChart.setWidth(800);
-    myChart.setHeight(500);
-    myChart.setBackgroundColor('white');
+    // myChart.setWidth(800);
+    // myChart.setHeight(500);
+    // myChart.setBackgroundColor('white');
 
-    const imageBuffer = await myChart.toBinary();
-    const imageId = workbook.addImage({
-      buffer: imageBuffer as any,
-      extension: 'png',
-    });
+    // const imageBuffer = await myChart.toBinary();
 
+    // const imageId = workbook.addImage({
+    //   buffer: imageBuffer as any,
+    //   extension: 'png',
+    // });
+
+    // const chartSheet = workbook.addWorksheet('Line Balance');
+    // chartSheet.views = [
+    //   { showGridLines: false, state: 'normal', zoomScale: 100 },
+    // ];
+
+    // chartSheet.addImage(imageId, {
+    //   tl: { col: 1, row: 1 } as any,
+    //   br: { col: 12, row: 25 } as any,
+    // });
     const chartSheet = workbook.addWorksheet('Line Balance');
     chartSheet.views = [
       { showGridLines: false, state: 'normal', zoomScale: 100 },
     ];
 
-    chartSheet.addImage(imageId, {
-      tl: { col: 1, row: 1 } as any,
-      br: { col: 12, row: 25 } as any,
-    });
+    let currentRow = 1;
+
+    const allowedSections = ['cutting', 'stitching', 'assembly'];
+
+    for (const section of lsaData) {
+      const sectionName = section.title.trim().toLowerCase();
+      if (!allowedSections.includes(sectionName)) continue;
+
+      const chartLabels = section.rows.map((r) => r.no);
+      const dataLineBalance = section.rows.map((r) => r.lineBalance);
+
+      const dataTaktTime = new Array(chartLabels.length).fill(TatkTime);
+
+      const myChart = new QuickChart();
+
+      myChart.setConfig({
+        type: 'line',
+        data: {
+          labels: chartLabels,
+          datasets: [
+            {
+              label: 'Takt Time',
+              data: dataTaktTime,
+              borderColor: '#C65911',
+              borderWidth: 3,
+              pointRadius: 0,
+              fill: false,
+              tension: 0,
+              datalabels: { display: false },
+              order: 1,
+            },
+            {
+              label: 'CT combined/Labor',
+              data: dataLineBalance,
+              borderColor: '#548235',
+              backgroundColor: '#548235',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              fill: false,
+              tension: 0,
+              order: 2,
+              datalabels: {
+                align: 'end',
+                anchor: 'end',
+                color: 'black',
+                font: { weight: 'bold', size: 10 },
+                formatter: (value) => Number(value).toFixed(1),
+              },
+            },
+          ],
+        },
+        options: {
+          layout: {
+            padding: { top: 30, right: 20, left: 10, bottom: 10 },
+          },
+          title: {
+            display: true,
+            text: `LINE BALANCING CHART ${section.title.toUpperCase()}`,
+            fontSize: 20,
+            fontColor: 'black',
+            fontStyle: 'bold',
+            padding: 20,
+          },
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 40, usePointStyle: false },
+          },
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                  padding: 10,
+                  fontSize: 12,
+                },
+                scaleLabel: { display: false },
+                gridLines: {
+                  drawBorder: true,
+                  color: '#E0E0E0',
+                  borderDash: [5, 5],
+                },
+              },
+            ],
+            xAxes: [
+              {
+                gridLines: { display: false },
+                ticks: {
+                  autoSkip: false,
+                  maxRotation: 90,
+                  minRotation: 90,
+                  fontSize: 10,
+                  fontStyle: 'bold',
+                },
+              },
+            ],
+          },
+          plugins: {
+            datalabels: {
+              display: true,
+            },
+          },
+        },
+      });
+
+      const chartWidth = Math.max(1000, chartLabels.length * 30);
+      myChart.setWidth(chartWidth);
+      myChart.setHeight(500);
+      myChart.setBackgroundColor('white');
+
+      const imageBuffer = await myChart.toBinary();
+      const imageId = workbook.addImage({
+        buffer: imageBuffer as any,
+        extension: 'png',
+      });
+
+      const chartHeightRows = 25;
+
+      chartSheet.addImage(imageId, {
+        tl: { col: 1, row: currentRow } as any,
+        br: { col: 18, row: currentRow + chartHeightRows } as any,
+      });
+
+      currentRow += chartHeightRows + 2;
+    }
 
     return await workbook.xlsx.writeBuffer();
   }
