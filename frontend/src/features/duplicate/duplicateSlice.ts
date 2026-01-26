@@ -45,7 +45,11 @@ const initialState: IDuplicateState = {
 const duplicateSlice = createSlice({
   name: 'duplicate',
   initialState,
-  reducers: {},
+  reducers: {
+    resetDuplicateState: (state) => {
+      state.duplicate = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchDuplicateList.pending, (state) => {
@@ -65,5 +69,7 @@ const duplicateSlice = createSlice({
       });
   },
 });
+
+export const { resetDuplicateState } = duplicateSlice.actions;
 
 export default duplicateSlice.reducer;

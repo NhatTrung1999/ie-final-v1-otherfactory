@@ -75,10 +75,183 @@ export class DuplicateService {
     return records;
   }
 
+  // async duplicateStage(ids: string[]) {
+  //   // console.log(ids);
+  //   const transaction = await this.IE.transaction();
+  //   const newItems: IStageListData[] = [];
+  //   const createdFiles: string[] = [];
+
+  //   const today = new Date();
+  //   const year = today.getFullYear();
+  //   const month = String(today.getMonth() + 1).padStart(2, '0');
+  //   const day = String(today.getDate()).padStart(2, '0');
+  //   const currentDateFolder = `${year}-${month}-${day}`;
+
+  //   const basePath =
+  //     this.configService.get('UPLOAD_DESTINATION') ||
+  //     '\\\\192.168.0.102\\cie\\IE_VIDEO';
+  //   try {
+  //     for (const id of ids) {
+  //       const oldStagelist: any[] = await this.IE.query(
+  //         `SELECT tb.*,
+  //                 sl.Date, sl.Season, sl.Stage, sl.CutDie, sl.Area, sl.Article, sl.Name, sl.Path as StagePath, sl.CreatedFactory
+  //           FROM IE_TableCT AS tb
+  //           LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
+  //           WHERE tb.Id = ?
+  //         `,
+  //         { replacements: [id], type: QueryTypes.SELECT, transaction },
+  //       );
+  //       if (!oldStagelist.length) continue;
+
+  //       const origin = oldStagelist[0];
+  //       const newId = uuidv4();
+
+  //       const oldPath = origin.StagePath;
+  //       let newPath = oldPath;
+
+  //       if (oldPath && fs.existsSync(oldPath)) {
+  //         const extension = path.extname(oldPath);
+  //         const fileName = path.basename(oldPath, extension);
+  //         const targetDir = path.join(
+  //           basePath,
+  //           currentDateFolder,
+  //           origin.Season || 'UnknowSeason',
+  //           origin.Stage || 'UnknowStage',
+  //           origin.Area || 'UnknowArea',
+  //           origin.Article || 'UnknowArticle',
+  //         );
+  //         if (!fs.existsSync(targetDir)) {
+  //           try {
+  //             fs.mkdirSync(targetDir, { recursive: true });
+  //           } catch (error) {
+  //             throw new Error(
+  //               `Không thể tạo thư mục lưu trữ: ${error.message}`,
+  //             );
+  //           }
+  //         }
+
+  //         let newFileName = `${fileName}${extension}`;
+  //         let newPath = path.join(targetDir, newFileName);
+
+  //         if (fs.existsSync(newPath)) {
+  //           newFileName = `${fileName}_copy_${Date.now()}${extension}`;
+  //           newPath = path.join(targetDir, newFileName);
+  //         }
+
+  //         try {
+  //           fs.copyFileSync(oldPath, newPath);
+  //           createdFiles.push(newPath);
+  //         } catch (error) {
+  //           throw new Error(
+  //             `Lỗi khi copy video (${fileName}): ${error.message}`,
+  //           );
+  //         }
+  //       }
+  //       await this.IE.query(
+  //         `INSERT INTO IE_StageList
+  //         (
+  //           Id,
+  //           [Date],
+  //           Season,
+  //           Stage,
+  //           CutDie,
+  //           Area,
+  //           Article,
+  //           Name,
+  //           [Path],
+  //           CreatedBy,
+  //           CreatedFactory,
+  //           CreatedAt
+  //         )
+  //         VALUES
+  //         (
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           ?,
+  //           GETDATE()
+  //         )`,
+  //         {
+  //           replacements: [
+  //             newId,
+  //             currentDateFolder,
+  //             origin.Season,
+  //             origin.Stage,
+  //             origin.CutDie,
+  //             origin.Area,
+  //             origin.Article,
+  //             origin.Name,
+  //             newPath,
+  //             origin.CreatedBy,
+  //             origin.CreatedFactory,
+  //           ],
+  //           type: QueryTypes.INSERT,
+  //           transaction,
+  //         },
+  //       );
+
+  //       await this.IE.query(
+  //         `INSERT INTO IE_TableCT
+  //          (Id, [No], ProgressStagePartName, Area, [Path], Nva, Va, MachineType, Loss, IsSave, CreatedBy, CreatedAt, OrderIndex)
+  //          VALUES
+  //          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
+  //         {
+  //           replacements: [
+  //             newId,
+  //             origin.No,
+  //             origin.ProgressStagePartName,
+  //             origin.Area,
+  //             newPath,
+  //             origin.Nva,
+  //             origin.Va,
+  //             origin.MachineType,
+  //             origin.Loss,
+  //             origin.IsSave,
+  //             origin.CreatedBy,
+  //           ],
+  //           type: QueryTypes.INSERT,
+  //           transaction,
+  //         },
+  //       );
+
+  //       const newItem: IStageListData[] = await this.IE.query(
+  //         `SELECT * FROM IE_StageList WHERE Id = ?`,
+  //         { replacements: [newId], type: QueryTypes.SELECT, transaction },
+  //       );
+  //       if (newItem.length) newItems.push(newItem[0]);
+  //     }
+  //     await transaction.commit();
+  //     return { message: 'Duplicate success', data: newItems };
+  //   } catch (error) {
+  //     await transaction.rollback();
+  //     if (createdFiles.length > 0) {
+  //       for (const file of createdFiles) {
+  //         try {
+  //           if (fs.existsSync(file)) {
+  //             fs.unlinkSync(file);
+  //           }
+  //         } catch (error) {
+  //           console.error(`Không thể xóa file rác: ${file}`, error);
+  //         }
+  //       }
+  //     }
+  //     throw new InternalServerErrorException(
+  //       'Duplicate failed: ' + error.message,
+  //     );
+  //   }
+  // }
+
   async duplicateStage(ids: string[]) {
-    // console.log(ids);
     const transaction = await this.IE.transaction();
     const newItems: IStageListData[] = [];
+
     const createdFiles: string[] = [];
 
     const today = new Date();
@@ -90,15 +263,24 @@ export class DuplicateService {
     const basePath =
       this.configService.get('UPLOAD_DESTINATION') ||
       '\\\\192.168.0.102\\cie\\IE_VIDEO';
+
     try {
       for (const id of ids) {
         const oldStagelist: any[] = await this.IE.query(
-          `SELECT tb.*,
-                  sl.Date, sl.Season, sl.Stage, sl.CutDie, sl.Area, sl.Article, sl.Name, sl.CreatedFactory
-            FROM IE_TableCT AS tb
-            LEFT JOIN IE_StageList AS sl ON sl.Id = tb.Id
-            WHERE tb.Id = ?
-          `,
+          `SELECT sl.*
+                  ,tb.No
+                  ,tb.ProgressStagePartName
+                  ,tb.Area               AS TbArea
+                  ,tb.Nva
+                  ,tb.Va
+                  ,tb.MachineType
+                  ,tb.Loss
+                  ,tb.IsSave
+                  ,tb.CreatedBy          AS TbCreatedBy
+            FROM   IE_StageList          AS sl
+                  LEFT JOIN IE_TableCT  AS tb
+                        ON  tb.Id = sl.Id
+            WHERE  sl.Id = ?`,
           { replacements: [id], type: QueryTypes.SELECT, transaction },
         );
         if (!oldStagelist.length) continue;
@@ -112,6 +294,7 @@ export class DuplicateService {
         if (oldPath && fs.existsSync(oldPath)) {
           const extension = path.extname(oldPath);
           const fileName = path.basename(oldPath, extension);
+
           const targetDir = path.join(
             basePath,
             currentDateFolder,
@@ -120,64 +303,40 @@ export class DuplicateService {
             origin.Area || 'UnknowArea',
             origin.Article || 'UnknowArticle',
           );
+
           if (!fs.existsSync(targetDir)) {
             try {
               fs.mkdirSync(targetDir, { recursive: true });
-            } catch (error) {
-              throw new Error(
-                `Không thể tạo thư mục lưu trữ: ${error.message}`,
-              );
+            } catch (err) {
+              throw new Error(`Lỗi tạo thư mục: ${err.message}`);
             }
           }
 
           let newFileName = `${fileName}${extension}`;
-          let newPath = path.join(targetDir, newFileName);
+          let tempNewPath = path.join(targetDir, newFileName);
 
-          if (fs.existsSync(newPath)) {
-            newFileName = `${fileName}_copy_${Date.now()}${extension}`;
-            newPath = path.join(targetDir, newFileName);
+          if (fs.existsSync(tempNewPath)) {
+            newFileName = `${fileName}-${newId}${extension}`;
+            tempNewPath = path.join(targetDir, newFileName);
           }
 
           try {
-            fs.copyFileSync(oldPath, newPath);
+            fs.copyFileSync(oldPath, tempNewPath);
+            newPath = tempNewPath;
             createdFiles.push(newPath);
           } catch (error) {
-            throw new Error(
-              `Lỗi khi copy video (${fileName}): ${error.message}`,
-            );
+            throw new Error(`Lỗi copy file (${fileName}): ${error.message}`);
           }
         }
+
         await this.IE.query(
           `INSERT INTO IE_StageList
           (
-            Id,
-            [Date],
-            Season,
-            Stage,
-            CutDie,
-            Area,
-            Article,
-            Name,
-            [Path],
-            CreatedBy,
-            CreatedFactory,
-            CreatedAt
+            Id, [Date], Season, Stage, CutDie, Area, Article, Name, [Path],
+            CreatedBy, CreatedFactory, CreatedAt, OrderIndex
           )
           VALUES
-          (
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            GETDATE()
-          )`,
+          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
           {
             replacements: [
               newId,
@@ -197,29 +356,86 @@ export class DuplicateService {
           },
         );
 
-        await this.IE.query(
-          `INSERT INTO IE_TableCT 
-           (Id, [No], ProgressStagePartName, Area, [Path], Nva, Va, MachineType, Loss, IsSave, CreatedBy, CreatedAt, OrderIndex)
-           VALUES 
-           (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
-          {
-            replacements: [
-              newId,
-              origin.No,
-              origin.ProgressStagePartName,
-              origin.Area,
-              newPath,
-              origin.Nva,
-              origin.Va,
-              origin.MachineType,
-              origin.Loss,
-              origin.IsSave,
-              origin.CreatedBy,
-            ],
-            type: QueryTypes.INSERT,
-            transaction,
-          },
+        const checkExistTableCT: any[] = await this.IE.query(
+          `
+          SELECT *
+          FROM IE_TableCT
+          WHERE Id = ?
+          `,
+          { replacements: [id], type: QueryTypes.SELECT, transaction },
         );
+
+        if (checkExistTableCT.length > 0) {
+          const normalizedPath = newPath.replace(/\\/g, '/');
+          const relativePath = normalizedPath.split('/IE_VIDEO')[1];
+          await this.IE.query(
+            `INSERT INTO IE_TableCT
+             (Id, [No], ProgressStagePartName, Area, [Path], Nva, Va, MachineType, Loss, IsSave, CreatedBy, CreatedAt, OrderIndex)
+             VALUES
+             (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
+            {
+              replacements: [
+                newId,
+                origin.No,
+                origin.ProgressStagePartName,
+                origin.TbArea,
+                `${this.configService.get('BASEPATH')}/IE_VIDEO${relativePath}`,
+                origin.Nva,
+                origin.Va,
+                origin.MachineType,
+                origin.Loss,
+                origin.IsSave,
+                origin.CreatedBy,
+              ],
+              type: QueryTypes.INSERT,
+              transaction,
+            },
+          );
+
+          const oldHistoryPlayback: any[] = await this.IE.query(
+            `
+            SELECT *
+            FROM IE_HistoryPlayback
+            WHERE HistoryPlaybackId = ?
+            `,
+            { replacements: [id], type: QueryTypes.SELECT, transaction },
+          );
+
+          // console.log(oldHistoryPlayback);
+          for (const item of oldHistoryPlayback) {
+            const newHistoryPlaybackId = uuidv4();
+            await this.IE.query(
+              `INSERT INTO IE_HistoryPlayback
+                    (Id, HistoryPlaybackId, [Type], [Start], Stop, CreatedBy, CreatedFactory, CreatedAt)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, GETDATE())`,
+              {
+                replacements: [
+                  newHistoryPlaybackId,
+                  newId,
+                  item.Type,
+                  item.Start,
+                  item.Stop,
+                  item.CreatedBy,
+                  item.CreatedFactory,
+                ],
+                type: QueryTypes.SELECT,
+              },
+            );
+          }
+
+          // await this.IE.query(
+          //   `INSERT INTO IE_HistoryPlayback
+          //         (Id, HistoryPlaybackId, [Type], [Start], Stop, CreatedBy, CreatedFactory, CreatedAt)
+          //     VALUES
+          //         (?, ?, ?, ?, ?, ?, ?, GETDATE())`,
+          //   {
+          //     replacements: [
+          //     ],
+          //     type: QueryTypes.SELECT,
+          //   },
+          // );
+        }
 
         const newItem: IStageListData[] = await this.IE.query(
           `SELECT * FROM IE_StageList WHERE Id = ?`,
@@ -227,6 +443,7 @@ export class DuplicateService {
         );
         if (newItem.length) newItems.push(newItem[0]);
       }
+
       await transaction.commit();
       return { message: 'Duplicate success', data: newItems };
     } catch (error) {
@@ -234,12 +451,8 @@ export class DuplicateService {
       if (createdFiles.length > 0) {
         for (const file of createdFiles) {
           try {
-            if (fs.existsSync(file)) {
-              fs.unlinkSync(file);
-            }
-          } catch (error) {
-            console.error(`Không thể xóa file rác: ${file}`, error);
-          }
+            if (fs.existsSync(file)) fs.unlinkSync(file);
+          } catch (e) {}
         }
       }
       throw new InternalServerErrorException(

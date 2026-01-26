@@ -5,10 +5,13 @@ import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
   duplicateStage,
   fetchDuplicateList,
+  resetDuplicateState,
 } from '../features/duplicate/duplicateSlice';
 import { formatDate } from '../utils/formatDate';
 import { useState } from 'react';
 import { stagelistList } from '../features/stagelist/stagelistSlice';
+import { getData } from '../features/tablect/tablectSlice';
+import { historyplaybackList } from '../features/historyplayback/historyplaybackSlice';
 
 type Props = {
   setIsDuplicateOpen: (isOpen: boolean) => void;
@@ -48,6 +51,8 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
   const handleDuplicate = async () => {
     await dispatch(duplicateStage(selectedIds));
     await dispatch(stagelistList({ ...filter }));
+    await dispatch(getData({ ...filter }));
+    await dispatch(historyplaybackList());
     setIsDuplicateOpen(false);
   };
 
@@ -58,7 +63,10 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
           <h1 className="text-2xl font-bold">Duplicate Stage</h1>
           <div
             className="p-1 cursor-pointer"
-            onClick={() => setIsDuplicateOpen(false)}
+            onClick={() => {
+              setIsDuplicateOpen(false);
+              dispatch(resetDuplicateState());
+            }}
           >
             <IoClose size={24} />
           </div>
@@ -231,7 +239,10 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
             </button>
             <button
               type="button"
-              onClick={() => setIsDuplicateOpen(false)}
+              onClick={() => {
+                setIsDuplicateOpen(false);
+                dispatch(resetDuplicateState());
+              }}
               className="px-2.5 py-1.5 cursor-pointer font-medium hover:cursor-pointer text-white bg-red-600 rounded-lg hover:bg-red-500 focus:ring-2 focus:ring-blue-400"
             >
               Cancel
