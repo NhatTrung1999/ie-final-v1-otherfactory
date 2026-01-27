@@ -8,7 +8,6 @@ import {
   reorderStagelist,
   setActiveItemId,
   setActiveTabId,
-  setIsSearch,
   setPath,
   stagelistDelete,
   stagelistList,
@@ -18,6 +17,7 @@ import type { ITableCtPayload } from '../types/tablect';
 import {
   createData,
   deleteData,
+  getData,
   setActiveColId,
 } from '../features/tablect/tablectSlice';
 import { toast } from 'react-toastify';
@@ -43,6 +43,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { SortableStageItem } from './SortableStageItem';
+import { historyplaybackDeleteMultiple } from '../features/historyplayback/historyplaybackSlice';
 
 const StageList = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -50,14 +51,14 @@ const StageList = () => {
   const startX = useRef<number>(0);
   const scrollLeftStart = useRef<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { stagelist, activeTabId, activeItemId, filter, isSearch } =
-    useAppSelector((state) => state.stagelist);
+  const { stagelist, activeTabId, activeItemId, filter } = useAppSelector(
+    (state) => state.stagelist
+  );
   const { tablect } = useAppSelector((state) => state.tablect);
   const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(setIsSearch(true));
     dispatch(stagelistList({ ...filter }));
   }, [dispatch, filter]);
 
@@ -96,7 +97,7 @@ const StageList = () => {
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLDivElement>,
-    id: string,
+    id: string
   ) => {
     e.stopPropagation();
 
@@ -105,6 +106,7 @@ const StageList = () => {
     if (stagelistDelete.fulfilled.match(result)) {
       toast.success(result.payload.message || 'Delete successfully!');
       await dispatch(deleteData(id));
+      await dispatch(historyplaybackDeleteMultiple(id));
       await dispatch(stagelistList({ ...filter }));
       dispatch(setPath(''));
     } else {
@@ -164,20 +166,17 @@ const StageList = () => {
   };
 
   const handleRefresh = () => {
-    dispatch(setIsSearch(false));
-    dispatch(stagelistList({ ...filter }));
+    dispatch(stagelistList({ ...filter, IsCompleted: true }));
+    dispatch(getData({ ...filter, IsCompleted: true }));
   };
 
   const filteredStagelist = useMemo(() => {
     let data = stagelist
       .filter((item) => item.Area === activeTabId)
       .filter((item) => item.CreatedBy === auth?.UserID);
-    if (!isSearch) {
-      data = data.filter((item) => !item.IsCompleted);
-    }
 
     return data;
-  }, [stagelist, activeTabId, auth?.UserID, isSearch]);
+  }, [stagelist, activeTabId, auth?.UserID]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -185,7 +184,7 @@ const StageList = () => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -196,14 +195,14 @@ const StageList = () => {
         reorderStagelist({
           activeId: active.id as string,
           overId: over.id as string,
-        }),
+        })
       );
 
       const oldIndex = filteredStagelist.findIndex(
-        (item) => item.Id === active.id,
+        (item) => item.Id === active.id
       );
       const newIndex = filteredStagelist.findIndex(
-        (item) => item.Id === over.id,
+        (item) => item.Id === over.id
       );
 
       const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);

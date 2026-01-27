@@ -55,8 +55,9 @@ import { SortableTableRow } from './SortableTableRow';
 const TableCT = () => {
   const { tablect, activeColId, machineTypes, selectedMachineType } =
     useAppSelector((state) => state.tablect);
-  const { activeItemId, activeTabId, filter, stagelist, isSearch } =
-    useAppSelector((state) => state.stagelist);
+  const { activeItemId, activeTabId, filter } = useAppSelector(
+    (state) => state.stagelist
+  );
   const { currentTime } = useAppSelector((state) => state.controlpanel);
   const { auth } = useAppSelector((state) => state.auth);
   const category = localStorage.getItem('category');
@@ -68,20 +69,12 @@ const TableCT = () => {
     dispatch(getDepartmentMachineType());
   }, [filter, dispatch]);
 
-  const completedStageIds = useMemo(
-    () => stagelist.filter((s) => s.IsCompleted).map((s) => s.Id),
-    [stagelist]
-  );
-
   const filteredTableCt = useMemo(() => {
     let data = tablect
       .filter((item) => item.Area === activeTabId)
       .filter((item) => item.CreatedBy === auth?.UserID);
-    if (!isSearch) {
-      data = data.filter((item) => !completedStageIds.includes(item.Id));
-    }
     return data;
-  }, [tablect, activeTabId, auth?.UserID, completedStageIds, isSearch]);
+  }, [tablect, activeTabId, auth?.UserID]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -153,6 +146,7 @@ const TableCT = () => {
     item: ITableData
   ) => {
     e.stopPropagation();
+    // console.log(item);
     dispatch(
       setUpdateAverage({
         category,
@@ -180,7 +174,6 @@ const TableCT = () => {
         Va: JSON.stringify(item.Va),
         ConfirmId: auth?.UserID || '',
       }));
-    console.log(newTablect);
     let result = await dispatch(confirmData(newTablect));
     if (confirmData.fulfilled.match(result)) {
       await dispatch(getData({ ...filter }));
@@ -272,7 +265,7 @@ const TableCT = () => {
       })
     );
     if (saveData.fulfilled.match(result)) {
-      dispatch(getData({ ...filter }));
+      // dispatch(getData({ ...filter }));
       await dispatch(stagelistMarkCompleted(item.Id));
     }
     dispatch(setActiveItemId(null));

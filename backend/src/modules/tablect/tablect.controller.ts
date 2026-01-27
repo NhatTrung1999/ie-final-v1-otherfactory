@@ -24,6 +24,7 @@ export class TablectController {
     @Query('Stage') Stage: string,
     @Query('Area') Area: string,
     @Query('Article') Article: string,
+    @Query('IsCompleted') IsCompleted: boolean,
   ) {
     return this.tablectService.getData(
       DateFrom,
@@ -32,6 +33,7 @@ export class TablectController {
       Stage,
       Area,
       Article,
+      IsCompleted,
     );
   }
 

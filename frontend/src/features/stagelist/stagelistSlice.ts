@@ -33,7 +33,6 @@ const initialState: IStageListState = {
     Article: '',
     Account: '',
   },
-  isSearch: true,
   loading: false,
   error: null,
 };
@@ -50,7 +49,7 @@ export const stagelistUpload = createAsyncThunk(
       onProgress?: (p: number) => void;
       controller: AbortController;
     },
-    { rejectWithValue },
+    { rejectWithValue }
   ) => {
     try {
       const { date, season, stage, cutDie, area, article, files } = payload;
@@ -70,16 +69,16 @@ export const stagelistUpload = createAsyncThunk(
       const res = await stagelistApi.stagelistUpload(
         formData,
         onProgress,
-        controller.signal,
+        controller.signal
       );
       return res as IStageList[];
     } catch (error: any) {
       // console.log(error);
       return rejectWithValue(
-        error?.response?.data?.message || 'Upload failed!',
+        error?.response?.data?.message || 'Upload failed!'
       );
     }
-  },
+  }
 );
 
 export const stagelistList = createAsyncThunk(
@@ -91,7 +90,7 @@ export const stagelistList = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error || '');
     }
-  },
+  }
 );
 
 export const stagelistDelete = createAsyncThunk(
@@ -104,7 +103,7 @@ export const stagelistDelete = createAsyncThunk(
       // console.log(error);
       return rejectWithValue(error?.response?.data?.message);
     }
-  },
+  }
 );
 
 export const stagelistUpdateOrder = createAsyncThunk(
@@ -115,10 +114,10 @@ export const stagelistUpdateOrder = createAsyncThunk(
       return ids;
     } catch (error: any) {
       return rejectWithValue(
-        error?.response?.data?.message || 'Update order failed',
+        error?.response?.data?.message || 'Update order failed'
       );
     }
-  },
+  }
 );
 
 export const stagelistMarkCompleted = createAsyncThunk(
@@ -130,7 +129,7 @@ export const stagelistMarkCompleted = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error || 'Mark completed is failed!');
     }
-  },
+  }
 );
 
 const stagelistSlice = createSlice({
@@ -159,23 +158,20 @@ const stagelistSlice = createSlice({
         cutDie: string;
         area: string;
         article: string;
-      }>,
+      }>
     ) => {
       state.formUploadVideo = { ...action.payload };
     },
     setFilter: (state, action: PayloadAction<IFilter>) => {
       state.filter = { ...action.payload };
     },
-    setIsSearch: (state, action: PayloadAction<boolean>) => {
-      state.isSearch = action.payload;
-    },
     reorderStagelist: (
       state,
-      action: PayloadAction<{ activeId: string; overId: string }>,
+      action: PayloadAction<{ activeId: string; overId: string }>
     ) => {
       const { activeId, overId } = action.payload;
       const oldIndex = state.stagelist.findIndex(
-        (item) => item.Id === activeId,
+        (item) => item.Id === activeId
       );
       const newIndex = state.stagelist.findIndex((item) => item.Id === overId);
 
@@ -197,7 +193,7 @@ const stagelistSlice = createSlice({
         (state, action: PayloadAction<IStageList[]>) => {
           state.loading = false;
           action.payload.map((item) => state.stagelist.push(item));
-        },
+        }
       )
       .addCase(stagelistUpload.rejected, (state, action) => {
         state.loading = false;
@@ -215,7 +211,7 @@ const stagelistSlice = createSlice({
         (state, action: PayloadAction<IStageList[]>) => {
           state.loading = false;
           state.stagelist = action.payload;
-        },
+        }
       )
       .addCase(stagelistList.rejected, (state, action) => {
         state.loading = false;
@@ -245,7 +241,6 @@ export const {
   setActiveItemId,
   setFormUploadVideo,
   setFilter,
-  setIsSearch,
   reorderStagelist,
 } = stagelistSlice.actions;
 

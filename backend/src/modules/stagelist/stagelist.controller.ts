@@ -38,6 +38,7 @@ export class StagelistController {
     @Query('Stage') Stage: string,
     @Query('Area') Area: string,
     @Query('Article') Article: string,
+    @Query('IsCompleted') IsCompleted: boolean,
   ) {
     // console.log(DateFrom, DateTo, Season, Stage, Area, Article);
     return await this.stagelistService.stagelistList(
@@ -47,6 +48,7 @@ export class StagelistController {
       Stage,
       Area,
       Article,
+      IsCompleted,
     );
   }
 

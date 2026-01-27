@@ -333,10 +333,10 @@ export class DuplicateService {
           `INSERT INTO IE_StageList
           (
             Id, [Date], Season, Stage, CutDie, Area, Article, Name, [Path],
-            CreatedBy, CreatedFactory, CreatedAt, OrderIndex
+            CreatedBy, CreatedFactory, CreatedAt, OrderIndex, IsCompleted
           )
           VALUES
-          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999)`,
+          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), 9999, ?)`,
           {
             replacements: [
               newId,
@@ -350,6 +350,7 @@ export class DuplicateService {
               newPath,
               origin.CreatedBy,
               origin.CreatedFactory,
+              origin.IsCompleted
             ],
             type: QueryTypes.INSERT,
             transaction,

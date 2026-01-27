@@ -319,11 +319,21 @@ const tablectSlice = createSlice({
         saveData.fulfilled,
         (state, action: PayloadAction<ITableCtResponse[]>) => {
           state.loading = false;
-          state.tablect = action.payload.map((item) => ({
-            ...item,
-            Nva: JSON.parse(item.Nva),
-            Va: JSON.parse(item.Va),
-          }));
+          action.payload.forEach((payloadItem) => {
+            const index = state.tablect.findIndex(
+              (item) => item.Id === payloadItem.Id
+            );
+            // console.log(index);
+            if (index !== -1) {
+              state.tablect[index] = {
+                ...state.tablect[index],
+                ...payloadItem,
+                Nva: JSON.parse(payloadItem.Nva),
+                Va: JSON.parse(payloadItem.Va),
+                IsSave: true,
+              };
+            }
+          });
         }
       )
       .addCase(saveData.rejected, (state, action) => {

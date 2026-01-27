@@ -152,6 +152,7 @@ export class StagelistService {
     Stage: string,
     Area: string,
     Article: string,
+    IsCompleted: boolean = false,
   ) {
     let where = 'WHERE 1=1';
     const replacements: any[] = [];
@@ -179,6 +180,10 @@ export class StagelistService {
     if (Article) {
       where += ` AND Article LIKE ?`;
       replacements.push(`%${Article}%`);
+    }
+
+    if (IsCompleted) {
+      where += ` AND IsCompleted <> '1'`;
     }
 
     let records: IStageListData[] = await this.IE.query(

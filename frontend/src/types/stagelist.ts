@@ -29,6 +29,7 @@ export interface IFilter {
   Stage?: string;
   Area?: string;
   Article?: string;
+  IsCompleted?: boolean;
   Account?: string;
   EstimateOutput?: number;
   TatkTime?: number;
@@ -50,5 +51,4 @@ export interface IStageListState {
     article: string;
   };
   filter?: IFilter;
-  isSearch: boolean;
 }

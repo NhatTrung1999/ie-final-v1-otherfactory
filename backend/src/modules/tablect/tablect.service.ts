@@ -24,6 +24,7 @@ export class TablectService {
     Stage: string,
     Area: string,
     Article: string,
+    IsCompleted: boolean = false,
   ) {
     let where = 'WHERE 1=1';
     const replacements: any[] = [];
@@ -51,6 +52,10 @@ export class TablectService {
     if (Article) {
       where += ` AND sl.Article LIKE ?`;
       replacements.push(`%${Article}%`);
+    }
+
+    if (IsCompleted) {
+      where += ` AND sl.IsCompleted <> '1'`;
     }
 
     let records: ITablectData[] = await this.IE.query(
@@ -174,7 +179,7 @@ export class TablectService {
     const records: ITablectData[] = await this.IE.query(
       `SELECT *
         FROM IE_TableCT
-        ORDER BY CreatedAt`,
+        WHERE Id = ?`,
       { replacements: [Id], type: QueryTypes.SELECT },
     );
 
