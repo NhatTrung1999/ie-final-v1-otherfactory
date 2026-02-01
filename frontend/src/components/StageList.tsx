@@ -26,6 +26,8 @@ import {
   setCurrentTime,
   setDuration,
   setIsPlaying,
+  setStartTime,
+  setStopTime,
 } from '../features/controlpanel/controlpanelSlice';
 import {
   DndContext,
@@ -52,8 +54,9 @@ const StageList = () => {
   const scrollLeftStart = useRef<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { stagelist, activeTabId, activeItemId, filter } = useAppSelector(
-    (state) => state.stagelist
+    (state) => state.stagelist,
   );
+  const { isPlaying } = useAppSelector((state) => state.controlpanel);
   const { tablect } = useAppSelector((state) => state.tablect);
   const { auth } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -97,10 +100,14 @@ const StageList = () => {
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLDivElement>,
-    id: string
+    id: string,
   ) => {
     e.stopPropagation();
 
+    if (isPlaying) {
+      toast.warn('The video is playing!');
+      return;
+    }
     const result = await dispatch(stagelistDelete(id));
 
     if (stagelistDelete.fulfilled.match(result)) {
@@ -109,6 +116,11 @@ const StageList = () => {
       await dispatch(historyplaybackDeleteMultiple(id));
       await dispatch(stagelistList({ ...filter }));
       dispatch(setPath(''));
+      dispatch(setCurrentTime(0));
+      dispatch(setDuration(0));
+      dispatch(setStartTime(0));
+      dispatch(setStopTime(0));
+      dispatch(resetTypes());
     } else {
       toast.error(result.payload as string);
     }
@@ -184,7 +196,7 @@ const StageList = () => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -195,14 +207,14 @@ const StageList = () => {
         reorderStagelist({
           activeId: active.id as string,
           overId: over.id as string,
-        })
+        }),
       );
 
       const oldIndex = filteredStagelist.findIndex(
-        (item) => item.Id === active.id
+        (item) => item.Id === active.id,
       );
       const newIndex = filteredStagelist.findIndex(
-        (item) => item.Id === over.id
+        (item) => item.Id === over.id,
       );
 
       const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);

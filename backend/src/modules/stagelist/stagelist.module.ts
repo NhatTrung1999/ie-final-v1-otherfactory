@@ -85,7 +85,7 @@ import * as path from 'path';
           if (!allowedMimeTypes.includes(file.mimetype)) {
             return cb(
               new BadRequestException(
-                `Invalid file format: "${file.originalname}". Only video files are allowed (mp4, avi, mov, mkv).`,
+                `Only video files are allowed (mp4, avi, mov, mkv).`,
               ),
               false,
             );
