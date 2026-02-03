@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { setUpdateValueRow } from '../features/tablect/tablectSlice';
 import { resetTypes } from '../features/controlpanel/controlpanelSlice';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { toast } from 'react-toastify';
 
 type Props = {
   setIsOpen: (isOpen: boolean) => void;
@@ -29,6 +30,10 @@ const ModalLSA = ({ setIsOpen, activeColId }: Props) => {
     validationSchema,
     onSubmit: async (data) => {
       const { pieces, layers } = data;
+      if (Number(pieces) === 0 || Number(layers) === 0) {
+        toast.warning('Pieces and Layers must be greater than 0');
+        return;
+      }
       if (!activeColId) return;
       const [id, colId] = activeColId?.split('_').map(String);
       dispatch(

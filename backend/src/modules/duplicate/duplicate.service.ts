@@ -26,7 +26,7 @@ export class DuplicateService {
     Area: string,
     Article: string,
   ) {
-    let where = 'WHERE 1=1';
+    let where = 'WHERE 1=1 AND tc.IsSave<>0';
     const replacements: any[] = [];
 
     if (DateFrom && DateTo) {
@@ -56,12 +56,14 @@ export class DuplicateService {
 
     let records: IStageListData[] = await this.IE.query(
       `SELECT *
-        FROM IE_StageList
+        FROM   IE_StageList          AS sl
+              LEFT JOIN IE_TableCT  AS tc
+                    ON  tc.Id = sl.Id
         ${where}
         ORDER BY 
-          CASE WHEN OrderIndex IS NULL THEN 1 ELSE 0 END, 
-          OrderIndex ASC, 
-          CreatedAt DESC`,
+          CASE WHEN sl.OrderIndex IS NULL THEN 1 ELSE 0 END, 
+          sl.OrderIndex ASC, 
+          sl.CreatedAt DESC`,
       { replacements, type: QueryTypes.SELECT },
     );
     records = records.map((item) => {

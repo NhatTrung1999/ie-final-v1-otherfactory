@@ -54,7 +54,7 @@ const StageList = () => {
   const scrollLeftStart = useRef<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { stagelist, activeTabId, activeItemId, filter } = useAppSelector(
-    (state) => state.stagelist,
+    (state) => state.stagelist
   );
   const { isPlaying } = useAppSelector((state) => state.controlpanel);
   const { tablect } = useAppSelector((state) => state.tablect);
@@ -100,7 +100,7 @@ const StageList = () => {
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLDivElement>,
-    id: string,
+    id: string
   ) => {
     e.stopPropagation();
 
@@ -121,6 +121,7 @@ const StageList = () => {
       dispatch(setStartTime(0));
       dispatch(setStopTime(0));
       dispatch(resetTypes());
+      dispatch(setActiveColId(null));
     } else {
       toast.error(result.payload as string);
     }
@@ -129,7 +130,7 @@ const StageList = () => {
   const handleCreateRowData = (item: IStageList) => {
     const isDuplicate = tablect.some((row) => row.Id === item.Id);
     if (isDuplicate) {
-      dispatch(setPath(item.Path));
+      // dispatch(setPath(item.Path));
       return;
     }
     const newData: ITableCtPayload = {
@@ -156,14 +157,14 @@ const StageList = () => {
       CreatedBy: auth?.UserID || '',
     };
 
-    dispatch(setPath(item.Path));
+    // dispatch(setPath(item.Path));
     dispatch(createData(newData));
   };
 
   const handelClick = (item: IStageList) => {
     if (item.Id === activeItemId) {
       dispatch(setActiveItemId(null));
-      dispatch(setPath(''));
+      dispatch(setPath('null'));
       // dispatch(setActiveColId(null));
       dispatch(setCurrentTime(0));
       dispatch(setDuration(0));
@@ -196,7 +197,7 @@ const StageList = () => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -207,14 +208,14 @@ const StageList = () => {
         reorderStagelist({
           activeId: active.id as string,
           overId: over.id as string,
-        }),
+        })
       );
 
       const oldIndex = filteredStagelist.findIndex(
-        (item) => item.Id === active.id,
+        (item) => item.Id === active.id
       );
       const newIndex = filteredStagelist.findIndex(
-        (item) => item.Id === over.id,
+        (item) => item.Id === over.id
       );
 
       const newSortedList = arrayMove(filteredStagelist, oldIndex, newIndex);
@@ -257,10 +258,14 @@ const StageList = () => {
                   activeTabId === item ? 'bg-gray-900/50 text-white' : ''
                 }`}
                 onClick={() => {
+                  dispatch(setIsPlaying(false));
                   dispatch(setActiveTabId(item));
                   dispatch(setActiveItemId(null));
                   dispatch(setPath(''));
                   dispatch(setActiveColId(null));
+                  dispatch(setCurrentTime(0));
+                  dispatch(setDuration(0));
+                  dispatch(resetTypes());
                 }}
               >
                 {item}

@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { stagelistList } from '../features/stagelist/stagelistSlice';
 import { getData } from '../features/tablect/tablectSlice';
 import { historyplaybackList } from '../features/historyplayback/historyplaybackSlice';
+import { toast } from 'react-toastify';
 
 type Props = {
   setIsDuplicateOpen: (isOpen: boolean) => void;
@@ -23,6 +24,7 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
   const dispatch = useAppDispatch();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const formik = useFormik({
     initialValues: {
@@ -49,11 +51,21 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
   };
 
   const handleDuplicate = async () => {
-    await dispatch(duplicateStage(selectedIds));
-    await dispatch(stagelistList({ ...filter }));
-    await dispatch(getData({ ...filter }));
-    await dispatch(historyplaybackList());
-    setIsDuplicateOpen(false);
+    if (duplicate.length === 0) {
+      toast.warning('No data to duplicate');
+      return;
+    }
+    setLoading(true);
+    const result = await dispatch(duplicateStage(selectedIds));
+    if (duplicateStage.fulfilled.match(result)) {
+      // console.log(result.payload.message);
+      toast.success(result.payload.message);
+      await dispatch(stagelistList({ ...filter }));
+      await dispatch(getData({ ...filter }));
+      await dispatch(historyplaybackList());
+      setIsDuplicateOpen(false);
+      setLoading(false);
+    }
   };
 
   return (
@@ -137,7 +149,6 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
                 onChange={formik.handleChange}
                 className="w-full px-2 py-1.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none border-gray-300"
               >
-                <option value="">Choose option</option>
                 {STAGE.map((item, index) => (
                   <option key={index} value={item.value}>
                     {item.label}
@@ -232,10 +243,13 @@ const ModalDuplicate = ({ setIsDuplicateOpen }: Props) => {
           <div className="flex items-center justify-end gap-2 border-t border-gray-200 pt-2">
             <button
               type="button"
+              disabled={loading}
               onClick={handleDuplicate}
-              className={`px-2.5 py-1.5 cursor-pointer font-medium text-white bg-green-500 rounded-lg hover:bg-green-500 focus:ring-2 focus:ring-green-400`}
+              className={`px-2.5 py-1.5 cursor-pointer font-medium text-white bg-green-500 rounded-lg hover:bg-green-500 focus:ring-2 focus:ring-green-400 ${
+                loading ? 'hover:cursor-not-allowed' : 'hover:cursor-pointer'
+              }`}
             >
-              Duplicate
+              {loading ? 'Duplicating...' : 'Duplicate'}
             </button>
             <button
               type="button"

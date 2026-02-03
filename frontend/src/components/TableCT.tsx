@@ -326,7 +326,7 @@ const TableCT = () => {
   };
 
   const handleCheckDisabled = (item: ITableData): boolean | undefined => {
-    if (item.Nva.Average > 0 && item.Va.Average > 0) return true;
+    if (item.Nva.Average > 0 && item.Va.Average > 0) return true
     if (item.ConfirmId !== null) return true;
     return item.Id === activeItemId ? false : true;
   };

@@ -29,7 +29,7 @@ export const duplicateStage = createAsyncThunk(
   async (ids: string[], { rejectWithValue }) => {
     try {
       const res = await duplicateApi.duplicateStage(ids);
-      console.log(res);
+      return res
     } catch (error: any) {
       return rejectWithValue(error.message || 'Duplicate failed!');
     }
